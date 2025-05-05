@@ -10,6 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   InputOTP,
   InputOTPGroup,
@@ -20,11 +21,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Input } from "../ui/input";
 import { EmailOtpType } from "./email-otp-form";
+import { cn } from "@/lib/utils";
 
 const verifyOtpUserSchema = z.object({
   otp: z.string().min(6, { message: "OTP must be 6 digits" }),
@@ -37,17 +39,20 @@ const verifyOtpUserSchema = z.object({
 type VerifyOtpUser = z.infer<typeof verifyOtpUserSchema>;
 
 export function VerifyOtpForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const email = searchParams.get("email");
+  const encodedEmail = searchParams.get("email");
+  const email = encodedEmail ? decodeURIComponent(encodedEmail) : "";
   const type = searchParams.get("type") as EmailOtpType;
 
   const form = useForm<VerifyOtpUser>({
     resolver: zodResolver(verifyOtpUserSchema),
-    defaultValues: { otp: "", password: "" },
+    defaultValues: { otp: "", password: undefined },
     mode: "onChange",
   });
 
   const onSubmit = async (formData: VerifyOtpUser) => {
+    console.log("formData", formData);
     try {
       if (type === "sign-in") {
         await authClient.signIn.emailOtp(
@@ -60,6 +65,7 @@ export function VerifyOtpForm() {
               toast.error(ctx.error.message);
             },
             onSuccess: (ctx) => {
+              router.push("/");
               toast.success("Signed in successfully");
             },
           }
@@ -75,6 +81,7 @@ export function VerifyOtpForm() {
               toast.error(ctx.error.message);
             },
             onSuccess: (ctx) => {
+              router.push("/");
               toast.success("Email verified successfully");
             },
           }
@@ -90,7 +97,8 @@ export function VerifyOtpForm() {
             onError: (ctx) => {
               toast.error(ctx.error.message);
             },
-            onSuccess: (ctx) => {
+            onSuccess: () => {
+              router.push("/sign-in");
               toast.success("Password reset successfully");
             },
           }
@@ -98,6 +106,8 @@ export function VerifyOtpForm() {
       }
     } catch (error) {
       toast.error("Error sending OTP");
+    } finally {
+      form.reset();
     }
   };
 
@@ -144,8 +154,12 @@ export function VerifyOtpForm() {
             control={form.control}
             name="otp"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>OTP</FormLabel>
+              <FormItem
+                className={cn(
+                  type === "sign-in" && "flex flex-col items-center"
+                )}
+              >
+                {type !== "sign-in" && <FormLabel>OTP</FormLabel>}
                 <FormControl>
                   <InputOTP
                     maxLength={6}
@@ -162,7 +176,12 @@ export function VerifyOtpForm() {
                     </InputOTPGroup>
                   </InputOTP>
                 </FormControl>
-                <FormDescription className="text-sm text-muted-foreground">
+                <FormDescription
+                  className={cn(
+                    type === "sign-in" &&
+                      "text-center text-sm text-muted-foreground"
+                  )}
+                >
                   Please enter the one-time password sent to your email.
                 </FormDescription>
                 <FormMessage />

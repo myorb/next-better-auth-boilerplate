@@ -1,4 +1,9 @@
+import { TwoFactorOtpEmail } from "@/emails/2fa-otp-verification";
+import { VerificationEmail } from "@/emails/email-verification";
 import MagicLinkEmail from "@/emails/magic-link-login";
+import { ResetPasswordEmail } from "@/emails/reset-password";
+import { ResetPasswordOtpEmail } from "@/emails/reset-password-otp";
+import { SigninOtpVerificationEmail } from "@/emails/signin-otp-verification";
 import { db } from "@/server"; // your drizzle instance
 import { render } from "@react-email/components";
 import { betterAuth } from "better-auth";
@@ -27,7 +32,10 @@ export const auth = betterAuth({
         from: process.env.BETTER_AUTH_EMAIL_FROM!,
         to: user.email,
         subject: "Reset your password",
-        text: `Click the link to reset your password: ${url}`,
+        react: ResetPasswordEmail({ url, expiresIn: "24 hours" }),
+        text: await render(ResetPasswordEmail({ url, expiresIn: "24 hours" }), {
+          plainText: true,
+        }),
       });
     },
   },
@@ -48,24 +56,48 @@ export const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
+    expiresIn: 600, // 10 minutes
     sendVerificationEmail: async ({ user, url }) => {
       await resend.emails.send({
         from: process.env.BETTER_AUTH_EMAIL_FROM!,
         to: user.email,
         subject: "Verify your email address",
-        text: `Click the link to verify your email: ${url}`,
+        react: VerificationEmail({
+          verificationUrl: url,
+          expiresIn: "10 minutes",
+        }),
+        text: await render(
+          VerificationEmail({
+            verificationUrl: url,
+            expiresIn: "10 minutes",
+          }),
+          { plainText: true }
+        ),
       });
     },
   },
   plugins: [
     twoFactor({
       otpOptions: {
+        digits: 6,
+        period: 300, // 5 minutes
+        allowedAttempts: 3,
         async sendOTP({ user, otp }) {
           await resend.emails.send({
             from: process.env.BETTER_AUTH_EMAIL_FROM!,
             to: user.email,
             subject: "2FA OTP for Vaanix",
-            text: `Your 2FA OTP is: ${otp}. It will expire in 5 minutes.`,
+            react: TwoFactorOtpEmail({
+              otpCode: otp,
+              expiresIn: "5 minutes",
+            }),
+            text: await render(
+              TwoFactorOtpEmail({
+                otpCode: otp,
+                expiresIn: "5 minutes",
+              }),
+              { plainText: true }
+            ),
           });
         },
       },
@@ -89,21 +121,41 @@ export const auth = betterAuth({
       expiresIn: 300, // 5 minutes
       allowedAttempts: 1,
       disableSignUp: true, // If the user is not registered, they'll be automatically registered. If you want to prevent this, set to true
-      sendVerificationOnSignUp: true,
+      sendVerificationOnSignUp: false,
       async sendVerificationOTP({ email, otp, type }) {
         if (type === "sign-in") {
           await resend.emails.send({
             from: process.env.BETTER_AUTH_EMAIL_FROM!,
             to: email,
             subject: "Sign in to Vaanix",
-            text: `Your verification code is: ${otp}. It will expire in 5 minutes.`,
+            react: SigninOtpVerificationEmail({
+              verificationCode: otp,
+              expiresIn: "5 minutes",
+            }),
+            text: await render(
+              SigninOtpVerificationEmail({
+                verificationCode: otp,
+                expiresIn: "5 minutes",
+              }),
+              { plainText: true }
+            ),
           });
         } else if (type === "forget-password") {
           await resend.emails.send({
             from: process.env.BETTER_AUTH_EMAIL_FROM!,
             to: email,
             subject: "Reset your password",
-            text: `Your password reset code is: ${otp}. It will expire in 5 minutes.`,
+            react: ResetPasswordOtpEmail({
+              otp: otp,
+              expiresIn: "5 minutes",
+            }),
+            text: await render(
+              ResetPasswordOtpEmail({
+                otp: otp,
+                expiresIn: "5 minutes",
+              }),
+              { plainText: true }
+            ),
           });
         }
       },

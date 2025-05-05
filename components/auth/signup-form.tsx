@@ -58,6 +58,8 @@ export function SignupForm() {
       );
     } catch (error) {
       toast.error("Error signing in");
+    } finally {
+      form.reset();
     }
   };
 

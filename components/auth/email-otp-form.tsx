@@ -42,13 +42,17 @@ export function EmailOtpForm({ type }: { type: EmailOtpType }) {
             toast.error("Error sending OTP");
           },
           onSuccess() {
-            router.push(`/verify-otp?email=${formData.email}&type=${type}`);
+            router.push(
+              `/verify-otp?email=${encodeURIComponent(formData.email)}&type=${type}`
+            );
             toast.success("OTP sent to email");
           },
         }
       );
     } catch (error) {
       toast.error("Error sending OTP");
+    } finally {
+      form.reset();
     }
   };
 

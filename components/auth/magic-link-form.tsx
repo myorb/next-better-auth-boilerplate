@@ -44,6 +44,8 @@ export function MagicLinkForm() {
       else toast.success("Magic link sent to email");
     } catch (error) {
       toast.error("Error signing in");
+    } finally {
+      form.reset();
     }
   };
 

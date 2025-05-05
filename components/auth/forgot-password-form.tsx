@@ -53,6 +53,8 @@ export function ForgotPasswordForm() {
       }
     } catch (error) {
       toast.error("Oops! Something broke on our end");
+    } finally {
+      form.reset();
     }
   };
 

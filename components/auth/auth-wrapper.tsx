@@ -82,6 +82,7 @@ export default function AuthWrapper({
       case "reset-password":
       case "signin-otp":
       case "magic-link":
+      case "verify-otp":
         return (
           <div className="text-xs text-center text-muted-foreground">
             <Link

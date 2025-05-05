@@ -52,6 +52,8 @@ export function Verify2FaForm() {
       );
     } catch (error) {
       toast.error("Error verifying code");
+    } finally {
+      form.reset();
     }
   };
 

@@ -1,4 +1,3 @@
-import * as React from "react";
 import {
   Body,
   Button,
@@ -8,8 +7,8 @@ import {
   Html,
   Preview,
   Section,
-  Text,
   Tailwind,
+  Text,
 } from "@react-email/components";
 
 interface MagicLinkEmailProps {
@@ -41,7 +40,7 @@ export default function MagicLinkEmail({ magicLink }: MagicLinkEmailProps) {
 
               <Section className="text-center mb-[32px]">
                 <Button
-                  className="bg-green-600 text-white font-bold py-[12px] px-[24px] rounded-[4px] no-underline text-center box-border"
+                  className="font-bold py-[12px] px-[24px] rounded-[4px] no-underline text-center box-border"
                   href={magicLink}
                 >
                   Secure Login
