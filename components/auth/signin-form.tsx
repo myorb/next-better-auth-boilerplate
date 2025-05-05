@@ -44,12 +44,9 @@ export function SigninForm() {
         },
         {
           onError: (ctx) => {
-            if (ctx.error.status === 403) {
-              toast.error("Invalid email or password");
-            }
             toast.error(ctx.error.message);
           },
-          onSuccess: (ctx) => {
+          onSuccess: () => {
             toast.success("Signed in successfully");
           },
         }
