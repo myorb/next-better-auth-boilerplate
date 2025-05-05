@@ -15,7 +15,7 @@ export const auth = betterAuth({
   appName: "Next Better Auth Neon Boilerplate",
   baseURL: process.env.BETTER_AUTH_URL!,
   database: drizzleAdapter(db, { provider: "pg", usePlural: true }),
-  trustedOrigins: ["https://localhost:3000"],
+  trustedOrigins: [process.env.BETTER_AUTH_URL!],
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
@@ -41,7 +41,7 @@ export const auth = betterAuth({
       prompt: "select_account",
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      redirectURI: "https://localhost:3000/api/auth/callback/google",
+      redirectURI: `${process.env.BETTER_AUTH_URL}/api/auth/callback/google`,
     },
   },
   emailVerification: {
