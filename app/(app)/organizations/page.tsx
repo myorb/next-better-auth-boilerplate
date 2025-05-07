@@ -1,18 +1,19 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import { OrganizationAvatar } from "@/components/ui/organization-avatar";
+import { appConfig } from "@/constants/config";
 import { auth } from "@/lib/auth";
-import { ArrowRightIcon, Plus, UsersRound } from "lucide-react";
+import { ArrowRightIcon, UsersRound } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { OrganizationAction } from "./organization-action";
 
 export default async function OrganizationsPage() {
   const session = await auth.api.getSession({
@@ -49,22 +50,17 @@ export default async function OrganizationsPage() {
           <h1 className="text-2xl font-bold tracking-tight">
             Your Organizations
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-md text-muted-foreground">
             Select an organization to access its dashboard
           </p>
         </div>
-        <Link href="/organizations/create">
-          <Button>
-            <Plus size={16} />
-            Create Organization
-          </Button>
-        </Link>
+        <OrganizationAction />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {organizations.map((organization) => (
           <Link
-            href={`/organizations/${organization.slug}`}
+            href={`${appConfig.authRoutes.default}/${organization.slug}`}
             key={organization.id}
             className="transition-all duration-200 group"
           >

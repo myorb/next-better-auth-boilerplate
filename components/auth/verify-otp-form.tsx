@@ -16,7 +16,9 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import Link from "next/link";
@@ -26,7 +28,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { EmailOtpType } from "./email-otp-form";
-import { cn } from "@/lib/utils";
 
 const verifyOtpUserSchema = z.object({
   otp: z.string().min(6, { message: "OTP must be 6 digits" }),
@@ -65,7 +66,7 @@ export function VerifyOtpForm() {
               toast.error(ctx.error.message);
             },
             onSuccess: (ctx) => {
-              router.push("/");
+              router.push(appConfig.authRoutes.onboarding);
               toast.success("Signed in successfully");
             },
           }
@@ -81,7 +82,7 @@ export function VerifyOtpForm() {
               toast.error(ctx.error.message);
             },
             onSuccess: (ctx) => {
-              router.push("/onboarding");
+              router.push(appConfig.authRoutes.onboarding);
               toast.success("Email verified successfully");
             },
           }
@@ -98,7 +99,7 @@ export function VerifyOtpForm() {
               toast.error(ctx.error.message);
             },
             onSuccess: () => {
-              router.push("/signin");
+              router.push(appConfig.authRoutes.signin);
               toast.success("Password reset successfully");
             },
           }

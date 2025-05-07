@@ -1,3 +1,4 @@
+import { appConfig } from "@/constants/config";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -11,7 +12,7 @@ export default async function AuthLayout({
     headers: await headers(),
   });
 
-  if (session) redirect("/dashboard");
+  if (session) redirect(appConfig.authRoutes.default);
 
   return (
     <div className="flex h-screen flex-col items-center justify-center">

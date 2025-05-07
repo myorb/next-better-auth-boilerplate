@@ -15,6 +15,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
@@ -46,7 +47,7 @@ export function Verify2FaForm() {
           },
           onSuccess() {
             toast.success("Code verified successfully");
-            router.push("/onboarding");
+            router.push(appConfig.authRoutes.onboarding);
           },
         }
       );

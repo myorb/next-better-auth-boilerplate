@@ -10,11 +10,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { appConfig } from "@/constants/config";
 import { Plus } from "lucide-react";
+import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
 
 export function CreateOrganizationModal() {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -38,7 +41,12 @@ export function CreateOrganizationModal() {
         </DialogHeader>
         <div className="shadow-xs border-none">
           <div className="space-y-6 p-0">
-            <CreateOrganizationForm onSuccess={() => setOpen(false)} />
+            <CreateOrganizationForm
+              onSuccess={({ slug }) => {
+                setOpen(false);
+                router.push(`${appConfig.authRoutes.default}/${slug}`);
+              }}
+            />
           </div>
         </div>
       </DialogContent>

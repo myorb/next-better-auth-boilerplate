@@ -25,6 +25,7 @@ import {
   CommandList,
   CommandShortcut,
 } from "@/components/ui/command";
+import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
@@ -131,7 +132,7 @@ export function SidebarCommand({
           action: () =>
             authClient.signOut({
               fetchOptions: {
-                onSuccess: () => router.push("/signin"),
+                onSuccess: () => router.push(appConfig.authRoutes.signin),
               },
             }),
           keywords: ["logout", "exit"],

@@ -25,6 +25,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
 import { useTheme } from "next-themes";
 import { useRouter } from "nextjs-toploader/app";
@@ -115,7 +116,7 @@ export function NavUser() {
               onClick={() =>
                 authClient.signOut({
                   fetchOptions: {
-                    onSuccess: () => router.push("/signin"),
+                    onSuccess: () => router.push(appConfig.authRoutes.signin),
                   },
                 })
               }

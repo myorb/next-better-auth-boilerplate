@@ -10,6 +10,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
@@ -33,7 +34,7 @@ export function ResetPasswordForm() {
 
   if (!token) {
     toast.error("Invalid token");
-    router.push("/signin");
+    router.push(appConfig.authRoutes.signin);
   }
 
   const form = useForm<ResetPasswordUser>({
@@ -50,6 +51,7 @@ export function ResetPasswordForm() {
       });
       if (error) toast.error(error.message);
       else toast.success("Password reset successfully");
+      router.push(appConfig.authRoutes.signin);
     } catch (error) {
       toast.error("Error resetting password");
     } finally {

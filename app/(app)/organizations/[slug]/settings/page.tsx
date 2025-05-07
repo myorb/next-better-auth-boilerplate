@@ -1,4 +1,5 @@
 import { MainLayout } from "@/components/sidebar/main-layout";
+import { appConfig } from "@/constants/config";
 
 export default async function SettingsPage({
   params,
@@ -9,7 +10,7 @@ export default async function SettingsPage({
   return (
     <MainLayout
       breadcrumbs={[
-        { label: slug, href: `/organizations/${slug}` },
+        { label: slug, href: `${appConfig.authRoutes.default}/${slug}` },
         { label: "Settings" },
       ]}
     >

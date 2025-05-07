@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { appConfig } from "@/constants/config";
 import { IconKey, IconMail } from "@tabler/icons-react";
 import { useRouter } from "nextjs-toploader/app";
 import { GoogleSignInButton } from "./google";
@@ -11,7 +12,7 @@ export function ChooseProvider() {
         variant="secondary"
         className="w-full"
         icon={<IconMail />}
-        onClick={() => router.push("/magic-link")}
+        onClick={() => router.push(appConfig.authRoutes.magicLink)}
       >
         Magic Link
       </Button>
@@ -19,7 +20,7 @@ export function ChooseProvider() {
         variant="secondary"
         className="w-full"
         icon={<IconMail />}
-        onClick={() => router.push("/signin-otp")}
+        onClick={() => router.push(appConfig.authRoutes.signin)}
       >
         Sign in with OTP
       </Button>

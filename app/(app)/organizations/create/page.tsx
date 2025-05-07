@@ -2,12 +2,13 @@
 
 import { CreateOrganizationForm } from "@/components/create-organization-form";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
+import { appConfig } from "@/constants/config";
 import { IconFlowerFilled } from "@tabler/icons-react";
 import Link from "next/link";
 import { useRouter } from "nextjs-toploader/app";
@@ -22,7 +23,7 @@ export default function CreateOrganizationPage() {
           <CardTitle className="flex items-center justify-between">
             <span>Create Organization</span>
             <Link
-              href="/organizations"
+              href={appConfig.authRoutes.default}
               className="text-muted-foreground text-sm hover:text-primary underline underline-offset-3"
             >
               View all
@@ -35,7 +36,7 @@ export default function CreateOrganizationPage() {
         <CardContent>
           <CreateOrganizationForm
             onSuccess={() => {
-              router.push("/organizations");
+              router.push(appConfig.authRoutes.default);
             }}
           />
         </CardContent>

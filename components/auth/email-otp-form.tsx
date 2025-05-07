@@ -10,6 +10,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "nextjs-toploader/app";
@@ -43,7 +44,7 @@ export function EmailOtpForm({ type }: { type: EmailOtpType }) {
           },
           onSuccess() {
             router.push(
-              `/verify-otp?email=${encodeURIComponent(formData.email)}&type=${type}`
+              `${appConfig.authRoutes.verifyOtp}?email=${encodeURIComponent(formData.email)}&type=${type}`
             );
             toast.success("OTP sent to email");
           },

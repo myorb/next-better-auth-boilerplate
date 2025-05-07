@@ -1,5 +1,6 @@
 "use client";
 
+import { createOrganization } from "@/actions/organizations";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,8 +13,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
+import { getErrorMessage } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "nextjs-toploader/app";
+import { APIError } from "better-auth";
+import { Organization } from "better-auth/plugins";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -32,13 +35,12 @@ const createOrganizationSchema = z.object({
 type CreateOrganization = z.infer<typeof createOrganizationSchema>;
 
 type CreateOrganizationFormProps = {
-  onSuccess: (organization: { id: string }) => void;
+  onSuccess: (organization: Organization) => void;
 };
 
 export function CreateOrganizationForm({
   onSuccess,
 }: CreateOrganizationFormProps) {
-  const router = useRouter();
   const [isValidatingSlug, setIsValidatingSlug] = useState(false);
   const [isCreatingOrganization, setIsCreatingOrganization] = useState(false);
   const [slugToCheck, setSlugToCheck] = useState("");
@@ -53,7 +55,7 @@ export function CreateOrganizationForm({
       try {
         setIsValidatingSlug(true);
         const { error } = await authClient.organization.checkSlug({ slug });
-        if (error) form.setError("slug", { message: error.message });
+        if (error) form.setError("slug", { message: "Slug is already taken" });
       } catch (error) {
         form.setError("slug", { message: "Error checking slug" });
       } finally {
@@ -76,21 +78,23 @@ export function CreateOrganizationForm({
   const onSubmit = async (data: CreateOrganization) => {
     try {
       setIsCreatingOrganization(true);
-      const { data: organization, error } =
-        await authClient.organization.create({
-          name: data.name,
-          slug: data.slug,
-        });
+      const { data: organization, error } = await createOrganization({
+        name: data.name,
+        slug: data.slug,
+      });
 
-      if (error) toast.error(error.message);
+      if (error) toast.error(getErrorMessage(error));
       if (organization) {
         await authClient.organization.setActive({
           organizationId: organization.id,
         });
-        onSuccess?.({ id: organization.id });
+        onSuccess?.(organization);
       }
     } catch (error) {
       console.error(error);
+      toast.error(
+        error instanceof APIError ? error.body?.message : "An error occurred"
+      );
     } finally {
       setIsCreatingOrganization(false);
     }
@@ -135,9 +139,8 @@ export function CreateOrganizationForm({
                   <FormDescription>Checking...</FormDescription>
                 ) : (
                   <FormDescription>
-                    {form.formState.errors
-                      ? `/organizations/${field.value}`
-                      : "Slug is already taken"}
+                    {!form.formState.errors.slug &&
+                      `/organizations/${field.value}`}
                   </FormDescription>
                 )}
                 <FormMessage />
@@ -147,7 +150,11 @@ export function CreateOrganizationForm({
           <Button
             type="submit"
             className="w-full"
-            disabled={isCreatingOrganization}
+            disabled={
+              isCreatingOrganization ||
+              !form.formState.isValid ||
+              isValidatingSlug
+            }
             loading={isCreatingOrganization}
           >
             Create Organization

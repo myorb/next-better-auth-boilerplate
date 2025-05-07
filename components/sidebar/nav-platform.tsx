@@ -5,6 +5,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { appConfig } from "@/constants/config";
 import { Home, Settings, Users } from "lucide-react";
 import Link from "next/link";
 
@@ -13,14 +14,14 @@ export function NavPlatform({ slug }: { slug: string }) {
     {
       id: "dashboard",
       title: "Dashboard",
-      url: `/organizations/${slug}`,
+      url: `${appConfig.authRoutes.default}/${slug}`,
       icon: Home,
       isActive: false,
     },
     {
       id: "members",
       title: "Members",
-      url: `/organizations/${slug}/members`,
+      url: `${appConfig.authRoutes.default}/${slug}/members`,
       icon: Users,
       isActive: false,
     },
@@ -41,7 +42,7 @@ export function NavPlatform({ slug }: { slug: string }) {
     {
       id: "settings",
       title: "Settings",
-      url: `/organizations/${slug}/settings`,
+      url: `${appConfig.authRoutes.default}/${slug}/settings`,
       icon: Settings,
       isActive: false,
     },

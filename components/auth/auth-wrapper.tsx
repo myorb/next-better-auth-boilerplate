@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { appConfig } from "@/constants/config";
 import { IconFlowerFilled } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -86,7 +87,7 @@ export default function AuthWrapper({
         return (
           <div className="text-xs text-center text-muted-foreground">
             <Link
-              href="/signin"
+              href={appConfig.authRoutes.signin}
               className="text-primary underline underline-offset-4"
             >
               Go back
@@ -98,7 +99,7 @@ export default function AuthWrapper({
           <div className="text-xs text-center text-muted-foreground">
             <span className="mr-1">Don&apos;t have an account?</span>
             <Link
-              href="/signup"
+              href={appConfig.authRoutes.signup}
               className="text-primary underline underline-offset-4"
             >
               Sign Up
@@ -110,7 +111,7 @@ export default function AuthWrapper({
           <div className="text-xs text-center text-muted-foreground">
             <span className="mr-1">Already have an account?</span>
             <Link
-              href="/signin"
+              href={appConfig.authRoutes.signin}
               className="text-primary underline underline-offset-4"
             >
               Sign in
@@ -143,7 +144,9 @@ export default function AuthWrapper({
             <Button
               variant="secondary"
               className="w-full"
-              onClick={() => router.push("/choose-provider")}
+              onClick={() =>
+                router.push(appConfig.authRoutes.chooseProvider)
+              }
             >
               Choose provider
             </Button>

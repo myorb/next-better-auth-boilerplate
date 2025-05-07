@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -14,7 +15,7 @@ export function GoogleSignInButton() {
       await authClient.signIn.social(
         {
           provider: "google",
-          callbackURL: "/onboarding",
+          callbackURL: appConfig.authRoutes.onboarding,
         },
         {
           onSuccess: (ctx) => {

@@ -21,6 +21,12 @@ export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL!,
   database: drizzleAdapter(db, { provider: "pg", usePlural: true }),
   trustedOrigins: [process.env.BETTER_AUTH_URL!],
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60, // Cache duration in seconds
+    },
+  },
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,

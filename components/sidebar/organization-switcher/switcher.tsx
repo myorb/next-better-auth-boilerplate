@@ -16,13 +16,16 @@ import {
   SidebarMenuSkeleton,
 } from "@/components/ui/sidebar";
 import { TextEllipsis } from "@/components/ui/text-ellipsis";
+import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 import { Organization } from "better-auth/plugins";
-import { ChevronDown } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CreateOrganizationModal } from "./create-organization";
+
 export function Switcher({ organizations }: { organizations: Organization[] }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -41,10 +44,7 @@ export function Switcher({ organizations }: { organizations: Organization[] }) {
         organizationSlug: data.organizationSlug,
       });
       if (error) toast.error("Failed to switch organization");
-      else {
-        toast.success("Switched organization");
-        refetch();
-      }
+      else refetch();
     } catch (error) {
       console.error(error);
     } finally {
@@ -89,15 +89,23 @@ export function Switcher({ organizations }: { organizations: Organization[] }) {
                 key={organization.id}
                 onClick={() => {
                   onSubmit({ organizationSlug: organization.slug });
-                  router.replace(`/organizations/${organization.slug}`);
+                  router.replace(
+                    `${appConfig.authRoutes.default}/${organization.slug}`
+                  );
                 }}
-                className="gap-2 p-2"
+                className={cn(
+                  "gap-2 p-2",
+                  activeOrganization?.id === organization.id && "bg-accent"
+                )}
               >
                 <OrganizationAvatar
                   orgId={organization.id}
                   orgName={organization.name}
                 />
                 <TextEllipsis width={140}>{organization.name}</TextEllipsis>
+                {activeOrganization?.id === organization.id && (
+                  <Check className="ml-auto size-4" />
+                )}
               </DropdownMenuItem>
             ))}
             {/* </ScrollArea> */}

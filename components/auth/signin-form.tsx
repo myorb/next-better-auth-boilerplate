@@ -10,10 +10,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import router from "next/router";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -40,7 +40,7 @@ export function SigninForm() {
         {
           email: formData.email,
           password: formData.password,
-          callbackURL: "/onboarding",
+          callbackURL: appConfig.authRoutes.onboarding,
         },
         {
           onError: (ctx) => {

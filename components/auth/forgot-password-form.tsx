@@ -12,6 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "nextjs-toploader/app";
@@ -46,7 +47,9 @@ export function ForgotPasswordForm() {
       } else {
         const { error } = await authClient.forgetPassword({
           email: formData.email,
-          redirectTo: formData.sendEmailOTP ? "/reset-password" : undefined,
+          redirectTo: formData.sendEmailOTP
+            ? appConfig.authRoutes.resetPassword
+            : undefined,
         });
         if (error) toast.error(error.message);
         else toast.success("Password reset link sent to email");
