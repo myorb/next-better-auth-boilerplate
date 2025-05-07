@@ -43,13 +43,16 @@ export function ForgotPasswordForm() {
           type: "forget-password",
         });
         if (error) toast.error(error.message);
-        else toast.success("OTP sent to your email");
+        else {
+          toast.success("OTP sent to your email");
+          router.push(
+            `${appConfig.authRoutes.verifyOtp}?email=${formData.email}&type=forget-password`
+          );
+        }
       } else {
         const { error } = await authClient.forgetPassword({
           email: formData.email,
-          redirectTo: formData.sendEmailOTP
-            ? appConfig.authRoutes.resetPassword
-            : undefined,
+          redirectTo: appConfig.authRoutes.resetPassword,
         });
         if (error) toast.error(error.message);
         else toast.success("Password reset link sent to email");
