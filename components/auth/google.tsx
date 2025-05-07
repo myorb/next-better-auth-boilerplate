@@ -18,9 +18,6 @@ export function GoogleSignInButton() {
           callbackURL: appConfig.authRoutes.onboarding,
         },
         {
-          onSuccess: (ctx) => {
-            toast.success("Signed in successfully");
-          },
           onError: (ctx) => {
             toast.error(ctx.error.message);
           },

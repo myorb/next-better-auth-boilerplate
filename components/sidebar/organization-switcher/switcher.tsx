@@ -22,18 +22,38 @@ import { cn } from "@/lib/utils";
 import { Organization } from "better-auth/plugins";
 import { Check, ChevronDown } from "lucide-react";
 import { useRouter } from "nextjs-toploader/app";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CreateOrganizationModal } from "./create-organization";
 
-export function Switcher({ organizations }: { organizations: Organization[] }) {
+export function Switcher({
+  organizations,
+  slug,
+}: {
+  organizations: Organization[];
+  slug: string;
+}) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const setActive = async () => {
+      setIsLoading(true);
+      try {
+        await authClient.organization.setActive({ organizationSlug: slug });
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to switch organization");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    setActive();
+  }, [slug]);
 
   const {
     data: activeOrganization,
     isRefetching,
-    isPending,
     refetch,
   } = authClient.useActiveOrganization();
 
@@ -47,6 +67,7 @@ export function Switcher({ organizations }: { organizations: Organization[] }) {
       else refetch();
     } catch (error) {
       console.error(error);
+      toast.error("Failed to switch organization");
     } finally {
       setIsLoading(false);
     }
@@ -57,7 +78,7 @@ export function Switcher({ organizations }: { organizations: Organization[] }) {
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            {isLoading || isRefetching || isPending ? (
+            {isLoading || isRefetching ? (
               <SidebarMenuSkeleton showIcon />
             ) : (
               <SidebarMenuButton className="w-fit px-1.5">

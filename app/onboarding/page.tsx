@@ -23,19 +23,8 @@ export default async function OnboardingPage() {
     query: { userId: data.session.userId },
   });
 
-  if (organizations.length > 0) {
-    const activeOrganization =
-      organizations.find(
-        (org) => org.id === data.session.activeOrganizationId
-      ) ?? organizations[0];
-    if (activeOrganization) {
-      await auth.api.setActiveOrganization({
-        headers: await headers(),
-        body: { organizationId: activeOrganization.id },
-      });
-      redirect(`${appConfig.authRoutes.default}/${activeOrganization.slug}`);
-    }
-  }
+  if (organizations.length > 0)
+    redirect(`${appConfig.authRoutes.default}/${organizations[0].slug}`);
 
   return (
     <div className="flex h-screen w-screen items-center justify-center">

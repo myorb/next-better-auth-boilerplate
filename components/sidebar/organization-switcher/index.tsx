@@ -1,8 +1,8 @@
+import { appConfig } from "@/constants/config";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Switcher } from "./switcher";
-import { appConfig } from "@/constants/config";
 
 export async function OrganizationsSwitcher({ slug }: { slug: string }) {
   const session = await auth.api.getSession({
@@ -14,10 +14,5 @@ export async function OrganizationsSwitcher({ slug }: { slug: string }) {
     headers: await headers(),
   });
 
-  await auth.api.setActiveOrganization({
-    headers: await headers(),
-    body: { organizationSlug: slug },
-  });
-
-  return <Switcher organizations={organizations} />;
+  return <Switcher organizations={organizations} slug={slug} />;
 }

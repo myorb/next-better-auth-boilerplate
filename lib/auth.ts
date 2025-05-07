@@ -8,6 +8,7 @@ import { db } from "@/server"; // your drizzle instance
 import { render } from "@react-email/components";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { nextCookies } from "better-auth/next-js";
 import {
   emailOTP,
   magicLink,
@@ -108,6 +109,7 @@ export const auth = betterAuth({
       },
     }),
     organization(),
+    nextCookies(),
     magicLink({
       sendMagicLink: async ({ email, url }) => {
         await resend.emails.send({

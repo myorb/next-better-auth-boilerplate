@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { getErrorMessage } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { APIError } from "better-auth";
+import { APIError } from "better-auth/api";
 import { Organization } from "better-auth/plugins";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
