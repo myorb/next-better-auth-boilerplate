@@ -12,7 +12,7 @@ export default async function AuthLayout({
     headers: await headers(),
   });
 
-  if (session) redirect(appConfig.authRoutes.default);
+  if (session) redirect(appConfig.authRoutes.onboarding);
 
   return (
     <div className="flex h-screen flex-col items-center justify-center">

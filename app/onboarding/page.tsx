@@ -18,18 +18,16 @@ export default async function OnboardingPage() {
   });
   if (!data) redirect(appConfig.authRoutes.signin);
 
-  const organization = await auth.api.listOrganizations({
+  const organizations = await auth.api.listOrganizations({
     headers: await headers(),
-    query: {
-      userId: data.session.userId,
-    },
+    query: { userId: data.session.userId },
   });
 
-  if (organization.length > 0) {
+  if (organizations.length > 0) {
     const activeOrganization =
-      organization.find(
+      organizations.find(
         (org) => org.id === data.session.activeOrganizationId
-      ) ?? organization[0];
+      ) ?? organizations[0];
     if (activeOrganization) {
       await auth.api.setActiveOrganization({
         headers: await headers(),
