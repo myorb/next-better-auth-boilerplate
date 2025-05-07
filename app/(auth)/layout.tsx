@@ -11,7 +11,7 @@ export default async function AuthLayout({
     headers: await headers(),
   });
 
-  if (session) redirect("/");
+  if (session) redirect("/dashboard");
 
   return (
     <div className="flex h-screen flex-col items-center justify-center">

@@ -42,7 +42,7 @@ export function SignupForm() {
           email: formData.email,
           password: formData.password,
           name: formData.name,
-          callbackURL: "/",
+          callbackURL: "/onboarding",
         },
         {
           onError: (ctx) => {

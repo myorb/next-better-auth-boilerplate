@@ -46,7 +46,7 @@ export function Verify2FaForm() {
           },
           onSuccess() {
             toast.success("Code verified successfully");
-            router.push("/");
+            router.push("/onboarding");
           },
         }
       );

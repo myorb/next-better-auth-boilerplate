@@ -12,7 +12,7 @@ import {
   emailOTP,
   magicLink,
   organization,
-  twoFactor,
+  twoFactor
 } from "better-auth/plugins";
 import { resend } from "./resend";
 
@@ -50,7 +50,6 @@ export const auth = betterAuth({
       prompt: "select_account",
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      redirectURI: `${process.env.BETTER_AUTH_URL}/api/auth/callback/google`,
     },
   },
   emailVerification: {

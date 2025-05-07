@@ -81,7 +81,7 @@ export function VerifyOtpForm() {
               toast.error(ctx.error.message);
             },
             onSuccess: (ctx) => {
-              router.push("/");
+              router.push("/onboarding");
               toast.success("Email verified successfully");
             },
           }
@@ -98,7 +98,7 @@ export function VerifyOtpForm() {
               toast.error(ctx.error.message);
             },
             onSuccess: () => {
-              router.push("/sign-in");
+              router.push("/signin");
               toast.success("Password reset successfully");
             },
           }

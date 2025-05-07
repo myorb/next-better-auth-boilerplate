@@ -40,7 +40,7 @@ export function SigninForm() {
         {
           email: formData.email,
           password: formData.password,
-          callbackURL: "/",
+          callbackURL: "/onboarding",
         },
         {
           onError: (ctx) => {
