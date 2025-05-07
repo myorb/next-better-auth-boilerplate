@@ -20,7 +20,7 @@ export function ChooseProvider() {
         variant="secondary"
         className="w-full"
         icon={<IconMail />}
-        onClick={() => router.push(appConfig.authRoutes.signin)}
+        onClick={() => router.push(appConfig.authRoutes.signinWithOtp)}
       >
         Sign in with OTP
       </Button>

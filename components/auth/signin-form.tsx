@@ -88,7 +88,7 @@ export function SigninForm() {
                   <FormLabel className="flex items-center justify-between">
                     Password
                     <Link
-                      href="/forgot-password"
+                      href={appConfig.authRoutes.forgotPassword}
                       className="text-sm text-muted-foreground hover:underline hover:underline-offset-4"
                     >
                       Forgot password?
