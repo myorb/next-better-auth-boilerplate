@@ -8,8 +8,12 @@ import {
 import { appConfig } from "@/constants/config";
 import { Home, Settings, Users } from "lucide-react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
-export function NavPlatform({ slug }: { slug: string }) {
+export function NavPlatform() {
+  const params = useParams();
+  const slug = params.slug as string;
+
   const items = [
     {
       id: "dashboard",

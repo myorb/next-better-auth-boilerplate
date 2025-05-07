@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Switcher } from "./switcher";
 
-export async function OrganizationsSwitcher({ slug }: { slug: string }) {
+export async function OrganizationsSwitcher() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -14,5 +14,5 @@ export async function OrganizationsSwitcher({ slug }: { slug: string }) {
     headers: await headers(),
   });
 
-  return <Switcher organizations={organizations} slug={slug} />;
+  return <Switcher organizations={organizations} />;
 }

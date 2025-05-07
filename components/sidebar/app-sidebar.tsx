@@ -12,17 +12,15 @@ import { NavPlatform } from "./nav-platform";
 import { NavSecondary } from "./nav-secondary";
 import { SidebarCommand } from "./sidebar-command";
 
-type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
-  slug: string;
-};
+type AppSidebarProps = React.ComponentProps<typeof Sidebar>;
 
-export async function AppSidebar({ slug, ...props }: AppSidebarProps) {
+export async function AppSidebar({ ...props }: AppSidebarProps) {
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
-        <OrganizationsSwitcher slug={slug} />
+        <OrganizationsSwitcher />
         <SidebarCommand />
-        <NavPlatform slug={slug} />
+        <NavPlatform />
       </SidebarHeader>
       <SidebarContent>{/* <NavWorkspaces /> */}</SidebarContent>
       <SidebarFooter>
