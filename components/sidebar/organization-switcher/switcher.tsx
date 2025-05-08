@@ -33,29 +33,27 @@ export function Switcher({ organizations }: { organizations: Organization[] }) {
     (organization) => organization.slug === slug
   );
 
-  useEffect(() => {
-    const setActive = async () => {
-      setIsLoading(true);
-      try {
-        await setActiveOrganization(slug);
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to switch organization");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    setActive();
-  }, [slug]);
-
-  const loadingActiveOrganization = isLoading;
+  // useEffect(() => {
+  //   const setActive = async () => {
+  //     setIsLoading(true);
+  //     try {
+  //       await setActiveOrganization(slug);
+  //     } catch (error) {
+  //       console.error(error);
+  //       toast.error("Failed to switch organization");
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+  //   setActive();
+  // }, [slug]);
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            {loadingActiveOrganization ? (
+            {isLoading ? (
               <SidebarMenuSkeleton showIcon />
             ) : (
               <SidebarMenuButton className="w-fit px-1.5">
