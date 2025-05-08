@@ -28,7 +28,7 @@ export default async function OnboardingPage() {
 
   return (
     <div className="flex h-screen w-screen items-center justify-center">
-      <Card className="w-full max-w-xs relative">
+      <Card className="w-full max-w-xs sm:max-w-sm relative">
         <CardHeader className="shadow-xs border-none bg-transparent">
           <div className="flex flex-col items-center text-center">
             <IconFlowerFilled className="size-10" />

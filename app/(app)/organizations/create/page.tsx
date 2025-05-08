@@ -17,7 +17,7 @@ export default function CreateOrganizationPage() {
   const router = useRouter();
   return (
     <div className="flex flex-col gap-4 h-svh justify-center items-center">
-      <Card className="w-full max-w-xs">
+      <Card className="w-full max-w-xs sm:max-w-sm">
         <CardHeader>
           <IconFlowerFilled className="size-8 mb-4" />
           <CardTitle className="flex items-center justify-between">

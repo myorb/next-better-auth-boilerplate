@@ -118,7 +118,7 @@ export default function AuthWrapper({ title, description, view }: Readonly<AuthW
   };
 
   return (
-    <Card className="w-full max-w-xs pb-0 relative">
+    <Card className="w-full max-w-xs sm:max-w-sm pb-0 relative">
       <CardHeader className="shadow-xs border-none bg-transparent">
         <div className="flex flex-col items-center text-center gap-2">
           <IconFlowerFilled className="w-10 h-10" />
