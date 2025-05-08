@@ -1,5 +1,6 @@
 "use client";
 
+import { setActiveOrganization } from "@/actions/organizations";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +16,6 @@ import {
   SidebarMenuSkeleton,
 } from "@/components/ui/sidebar";
 import { TextEllipsis } from "@/components/ui/text-ellipsis";
-import { authClient } from "@/lib/auth-client";
 import { Organization } from "better-auth/plugins";
 import { ChevronDown } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -29,13 +29,15 @@ export function Switcher({ organizations }: { organizations: Organization[] }) {
   const slug = params.slug as string;
   const [isLoading, setIsLoading] = useState(false);
 
-  const { data: activeOrganization } = authClient.useActiveOrganization();
+  const activeOrganization = organizations.find(
+    (organization) => organization.slug === slug
+  );
 
   useEffect(() => {
     const setActive = async () => {
       setIsLoading(true);
       try {
-        await authClient.organization.setActive({ organizationSlug: slug });
+        await setActiveOrganization(slug);
       } catch (error) {
         console.error(error);
         toast.error("Failed to switch organization");
@@ -84,7 +86,7 @@ export function Switcher({ organizations }: { organizations: Organization[] }) {
               <SwitcherItem
                 key={organization.id}
                 organization={organization}
-                activeOrganization={activeOrganization}
+                activeOrganizationId={activeOrganization?.id ?? ""}
                 setIsLoading={setIsLoading}
               />
             ))}

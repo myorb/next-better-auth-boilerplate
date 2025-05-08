@@ -39,11 +39,7 @@ type AuthWrapperProps = {
     | "verify-2fa";
 };
 
-export default function AuthWrapper({
-  title,
-  description,
-  view,
-}: AuthWrapperProps) {
+export default function AuthWrapper({ title, description, view }: Readonly<AuthWrapperProps>) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -122,7 +118,7 @@ export default function AuthWrapper({
   };
 
   return (
-    <Card className="w-full max-w-sm pb-0 relative">
+    <Card className="w-full max-w-xs pb-0 relative">
       <CardHeader className="shadow-xs border-none bg-transparent">
         <div className="flex flex-col items-center text-center gap-2">
           <IconFlowerFilled className="w-10 h-10" />
@@ -144,9 +140,7 @@ export default function AuthWrapper({
             <Button
               variant="secondary"
               className="w-full"
-              onClick={() =>
-                router.push(appConfig.authRoutes.chooseProvider)
-              }
+              onClick={() => router.push(appConfig.authRoutes.chooseProvider)}
             >
               Choose provider
             </Button>

@@ -11,6 +11,9 @@ type AppConfig = {
     chooseProvider: string;
     forgotPassword: string;
   };
+  appRoutes: {
+    acceptInvitation: string;
+  };
 };
 
 export const appConfig: AppConfig = {
@@ -25,5 +28,8 @@ export const appConfig: AppConfig = {
     resetPassword: "/reset-password",
     magicLink: "/magic-link",
     chooseProvider: "/choose-provider",
+  },
+  appRoutes: {
+    acceptInvitation: "/accept-invitation",
   },
 };

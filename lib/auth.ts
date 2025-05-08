@@ -1,6 +1,7 @@
 import { TwoFactorOtpEmail } from "@/emails/2fa-otp-verification";
 import { VerificationEmail } from "@/emails/email-verification";
 import MagicLinkEmail from "@/emails/magic-link-login";
+import OrganizationInviteEmail from "@/emails/organization-invitation";
 import { ResetPasswordEmail } from "@/emails/reset-password";
 import { ResetPasswordOtpEmail } from "@/emails/reset-password-otp";
 import { SigninOtpVerificationEmail } from "@/emails/signin-otp-verification";
@@ -13,7 +14,7 @@ import {
   emailOTP,
   magicLink,
   organization,
-  twoFactor
+  twoFactor,
 } from "better-auth/plugins";
 import { resend } from "./resend";
 
@@ -108,7 +109,28 @@ export const auth = betterAuth({
         },
       },
     }),
-    organization(),
+    organization({
+      cancelPendingInvitationsOnReInvite: true,
+      async sendInvitationEmail(data) {
+        const inviteLink = `${process.env.BETTER_AUTH_URL}/accept-invitation/${data.id}`;
+        await resend.emails.send({
+          from: process.env.BETTER_AUTH_EMAIL_FROM!,
+          to: data.email,
+          subject: "Invitation to join organization",
+          react: OrganizationInviteEmail({
+            organizationName: data.organization.name,
+            inviteLink,
+          }),
+          text: await render(
+            OrganizationInviteEmail({
+              organizationName: data.organization.name,
+              inviteLink,
+            }),
+            { plainText: true }
+          ),
+        });
+      },
+    }),
     nextCookies(),
     magicLink({
       sendMagicLink: async ({ email, url }) => {

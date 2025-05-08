@@ -1,10 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { OrganizationAvatar } from "@/components/ui/organization-avatar";
 import { appConfig } from "@/constants/config";

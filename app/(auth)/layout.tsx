@@ -15,7 +15,7 @@ export default async function AuthLayout({
   if (session) redirect(appConfig.authRoutes.onboarding);
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center">
+    <div className="flex h-svh flex-col items-center justify-center">
       {children}
     </div>
   );
