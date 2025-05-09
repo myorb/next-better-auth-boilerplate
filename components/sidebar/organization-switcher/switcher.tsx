@@ -1,6 +1,5 @@
 "use client";
 
-import { setActiveOrganization } from "@/actions/organizations";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,8 +18,7 @@ import { TextEllipsis } from "@/components/ui/text-ellipsis";
 import { Organization } from "better-auth/plugins";
 import { ChevronDown } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
 import { CreateOrganizationModal } from "./create-organization";
 import { SwitcherItem } from "./switcher-item";
 
@@ -32,21 +30,6 @@ export function Switcher({ organizations }: { organizations: Organization[] }) {
   const activeOrganization = organizations.find(
     (organization) => organization.slug === slug
   );
-
-  // useEffect(() => {
-  //   const setActive = async () => {
-  //     setIsLoading(true);
-  //     try {
-  //       await setActiveOrganization(slug);
-  //     } catch (error) {
-  //       console.error(error);
-  //       toast.error("Failed to switch organization");
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-  //   setActive();
-  // }, [slug]);
 
   return (
     <SidebarMenu>

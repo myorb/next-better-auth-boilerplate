@@ -28,33 +28,33 @@ function hashCode(str: string): number {
 // Function to generate consistent colors based on string
 function getColorStyles(str: string) {
   const hash = hashCode(str);
-  
+
   // List of vibrant background colors for light mode
   const bgColors = [
-    "bg-blue-100 dark:bg-blue-800",
-    "bg-purple-100 dark:bg-purple-800",
-    "bg-pink-100 dark:bg-pink-800",
-    "bg-orange-100 dark:bg-orange-800",
-    "bg-green-100 dark:bg-green-800",
-    "bg-teal-100 dark:bg-teal-800",
-    "bg-cyan-100 dark:bg-cyan-800",
-    "bg-red-100 dark:bg-red-800",
-    "bg-yellow-100 dark:bg-yellow-800",
-    "bg-indigo-100 dark:bg-indigo-800",
+    "dark:bg-blue-300 bg-blue-600",
+    "dark:bg-purple-300 bg-purple-600",
+    "dark:bg-pink-300 bg-pink-600",
+    "dark:bg-orange-300 bg-orange-600",
+    "dark:bg-green-300 bg-green-600",
+    "dark:bg-teal-300 bg-teal-600",
+    "dark:bg-cyan-300 bg-cyan-600",
+    "dark:bg-red-300 bg-red-600",
+    "dark:bg-yellow-300 bg-yellow-600",
+    "dark:bg-indigo-300 bg-indigo-600",
   ];
 
   // List of matching text colors
   const textColors = [
-    "text-blue-800 dark:text-blue-100",
-    "text-purple-800 dark:text-purple-100",
-    "text-pink-800 dark:text-pink-100",
-    "text-orange-800 dark:text-orange-100",
-    "text-green-800 dark:text-green-100",
-    "text-teal-800 dark:text-teal-100",
-    "text-cyan-800 dark:text-cyan-100",
-    "text-red-800 dark:text-red-100",
-    "text-yellow-800 dark:text-yellow-100",
-    "text-indigo-800 dark:text-indigo-100",
+    "dark:text-blue-800 text-blue-100",
+    "dark:text-purple-800 text-purple-100",
+    "dark:text-pink-800 text-pink-100",
+    "dark:text-orange-800 text-orange-100",
+    "dark:text-green-800 text-green-100",
+    "dark:text-teal-800 text-teal-100",
+    "dark:text-cyan-800 text-cyan-100",
+    "dark:text-red-800 text-red-100",
+    "dark:text-yellow-800 text-yellow-100",
+    "dark:text-indigo-800 text-indigo-100",
   ];
 
   // List of matching border colors
@@ -83,10 +83,10 @@ function getColorStyles(str: string) {
 // Function to get initials from organization name
 function getInitials(name: string): string {
   const cleanName = name.trim();
-  
+
   // If empty string, return default
   if (!cleanName) return "??";
-  
+
   // For single word
   if (!cleanName.includes(" ")) {
     // If word is 1 character, duplicate it
@@ -96,11 +96,11 @@ function getInitials(name: string): string {
     // If word is 2+ characters, take first two
     return cleanName.slice(0, 2).toUpperCase();
   }
-  
+
   // For multiple words, take first letter of first two words
   return cleanName
     .split(" ")
-    .map(word => word[0])
+    .map((word) => word[0])
     .slice(0, 2)
     .join("")
     .toUpperCase();
@@ -134,7 +134,7 @@ export function OrganizationAvatar({
     <Avatar
       className={cn(
         sizeClasses[size],
-        shape === "square" && "rounded-lg",
+        shape === "square" && "rounded-[4px]",
         border && cn("ring-1 ring-border border", colorStyles.border),
         "select-none",
         className
@@ -146,7 +146,7 @@ export function OrganizationAvatar({
           colorStyles.text,
           "font-medium transition-colors flex items-center justify-center",
           paddingClasses[size],
-          shape === "square" && "rounded-lg",
+          shape === "square" && "rounded-[4px]",
           fallbackClassName
         )}
       >
