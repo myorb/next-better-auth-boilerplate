@@ -21,7 +21,7 @@ export function Switcher({ organizations }: { organizations: Organization[] }) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-2 w-full">
+      <DropdownMenuTrigger className="flex items-center gap-2 w-full cursor-pointer">
         <span>Switch Organization</span>
         <ChevronDown className="ml-auto size-4" />
       </DropdownMenuTrigger>

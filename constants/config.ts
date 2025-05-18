@@ -13,6 +13,7 @@ type AppConfig = {
   };
   appRoutes: {
     acceptInvitation: string;
+    userProfile: string;
   };
 };
 
@@ -31,5 +32,6 @@ export const appConfig: AppConfig = {
   },
   appRoutes: {
     acceptInvitation: "/accept-invitation",
+    userProfile: "/profile",
   },
 };

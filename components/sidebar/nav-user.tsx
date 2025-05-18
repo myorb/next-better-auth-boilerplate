@@ -28,11 +28,15 @@ import {
 import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
 import { useTheme } from "next-themes";
+import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const router = useRouter();
+  const params = useParams<{ slug: string }>();
+  const slug = params.slug;
+
   const { data: session } = authClient.useSession();
   const { theme, setTheme } = useTheme();
 
@@ -87,7 +91,13 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => router.push("/user/profile")}>
+              <DropdownMenuItem
+                onClick={() =>
+                  router.push(
+                    `${appConfig.authRoutes.default}/${slug}${appConfig.appRoutes.userProfile}`
+                  )
+                }
+              >
                 <Settings />
                 Your Settings
               </DropdownMenuItem>

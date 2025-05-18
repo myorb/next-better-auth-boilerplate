@@ -73,7 +73,7 @@ export function OrganizationDropdown({
             <DropdownMenuLabel className="text-xs text-muted-foreground">
               Actions
             </DropdownMenuLabel>
-            <DropdownMenuItem>
+            <DropdownMenuItem asChild className="cursor-pointer">
               <Link
                 href={`${appConfig.authRoutes.default}/${slug}/members`}
                 prefetch
@@ -83,7 +83,7 @@ export function OrganizationDropdown({
                 <span>Members</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem asChild className="cursor-pointer">
               <Link
                 href={`${appConfig.authRoutes.default}/${slug}/settings`}
                 prefetch
@@ -93,7 +93,7 @@ export function OrganizationDropdown({
                 <span>Settings</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">
               <IconSwitch2 />
               <Switcher organizations={organizations} />
             </DropdownMenuItem>

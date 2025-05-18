@@ -44,7 +44,7 @@ export function SwitcherItem({
         );
       }}
       className={cn(
-        "gap-2 p-2",
+        "gap-2 p-2 cursor-pointer",
         activeOrganizationId === organization.id && "bg-accent"
       )}
     >
@@ -60,7 +60,7 @@ export function SwitcherItem({
         </TextEllipsis>
       </div>
       {activeOrganizationId === organization.id && (
-        <Check className="ml-auto size-4" />
+        <Check className="ml-auto size-4 text-primary" />
       )}
     </DropdownMenuItem>
   );
