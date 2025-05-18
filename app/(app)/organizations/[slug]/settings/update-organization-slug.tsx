@@ -20,7 +20,9 @@ import { Separator } from "@/components/ui/separator";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Organization } from "better-auth/plugins";
+import { error } from "console";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "nextjs-toploader/app";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -42,6 +44,7 @@ export function UpdateOrganizationSlug({
 }: {
   organization: Organization;
 }) {
+  const router = useRouter();
   const [isUpdating, setIsUpdating] = useState(false);
   const [slug, setSlug] = useState({
     initialValue: organization.slug,
@@ -85,10 +88,14 @@ export function UpdateOrganizationSlug({
   const onSubmit = async (data: UpdateOrganizationSlug) => {
     setIsUpdating(true);
     try {
-      await updateOrganization({
+      const { success } = await updateOrganization({
         name: organization.name,
         slug: data.slug,
       });
+      if (success) {
+        router.push(`/organizations/${data.slug}`);
+        toast.success("Organization slug updated successfully");
+      }
     } catch (error) {
       console.error(error);
       toast.error("Failed to update organization slug");
@@ -96,6 +103,12 @@ export function UpdateOrganizationSlug({
       setIsUpdating(false);
     }
   };
+
+  const disabledForm =
+    isUpdating ||
+    !form.formState.isValid ||
+    slug.isValidating ||
+    slug.value === slug.initialValue;
 
   return (
     <Form {...form}>
@@ -133,21 +146,11 @@ export function UpdateOrganizationSlug({
             />
           </CardContent>
           <Separator />
-          <CardFooter className="flex flex-row justify-between">
+          <CardFooter className="flex flex-row justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              Use a slug to identify your organization. Use only lowercase
-              letters, numbers, and hyphens.
+              Use only lowercase letters, numbers, and hyphens.
             </p>
-            <Button
-              type="submit"
-              disabled={
-                isUpdating ||
-                !form.formState.isValid ||
-                slug.isValidating ||
-                slug.value === slug.initialValue
-              }
-              loading={isUpdating}
-            >
+            <Button type="submit" disabled={disabledForm} loading={isUpdating}>
               Update Slug
             </Button>
           </CardFooter>

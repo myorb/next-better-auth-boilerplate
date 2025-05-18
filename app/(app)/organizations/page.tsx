@@ -79,7 +79,7 @@ export default async function OrganizationsPage() {
                       {organization.name}
                     </CardTitle>
                     <CardDescription className="flex items-center">
-                      {`/${organization.slug}`}
+                      {organization.slug}
                     </CardDescription>
                   </div>
                 </div>

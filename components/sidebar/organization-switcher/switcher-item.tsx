@@ -52,8 +52,20 @@ export function SwitcherItem({
         activeOrganizationId === organization.id && "bg-accent"
       )}
     >
-      <OrganizationAvatar orgId={organization.id} orgName={organization.name} />
-      <TextEllipsis width={140}>{organization.name}</TextEllipsis>
+      <OrganizationAvatar
+        orgId={organization.id}
+        orgName={organization.name}
+        className="size-8"
+      />
+      <div className="flex flex-col">
+        <TextEllipsis width={140}>{organization.name}</TextEllipsis>
+        <TextEllipsis
+          width={140}
+          className="text-[11px] text-muted-foreground"
+        >
+          {organization.slug}
+        </TextEllipsis>
+      </div>
       {activeOrganizationId === organization.id && (
         <Check className="ml-auto size-4" />
       )}

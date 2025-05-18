@@ -77,7 +77,7 @@ export function UpdateOrganizationName({
             />
           </CardContent>
           <Separator />
-          <CardFooter className="flex flex-row justify-between">
+          <CardFooter className="flex flex-row justify-between gap-4">
             <p className="text-sm text-muted-foreground">
               This action will update the name of the organization.
             </p>
