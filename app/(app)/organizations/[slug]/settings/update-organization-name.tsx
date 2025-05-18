@@ -82,7 +82,7 @@ export function UpdateOrganizationName({
               This action will update the name of the organization.
             </p>
             <Button type="submit" loading={isUpdating}>
-              Update
+              Update Name
             </Button>
           </CardFooter>
         </Card>

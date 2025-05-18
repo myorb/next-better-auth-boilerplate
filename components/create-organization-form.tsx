@@ -12,11 +12,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { InputWithAdornment } from "@/components/ui/input-with-adornment";
+import { OrganizationAvatar } from "@/components/ui/organization-avatar";
+import { TextEllipsis } from "@/components/ui/text-ellipsis";
 import { authClient } from "@/lib/auth-client";
 import { getErrorMessage } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { generateId } from "better-auth";
 import { APIError } from "better-auth/api";
 import { Organization } from "better-auth/plugins";
+import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -75,6 +80,18 @@ export function CreateOrganizationForm({
     return () => clearTimeout(timer);
   }, [slugToCheck, handleSlugCheck]);
 
+  const watchName = form.watch("name");
+
+  useEffect(() => {
+    if (watchName.trim() === "") {
+      form.setValue("slug", "");
+      return;
+    }
+    const slug = watchName.toLowerCase().replace(/ /g, "-");
+    setSlugToCheck(slug);
+    form.setValue("slug", slug);
+  }, [watchName, form]);
+
   const onSubmit = async (data: CreateOrganization) => {
     try {
       setIsCreatingOrganization(true);
@@ -99,10 +116,24 @@ export function CreateOrganizationForm({
       setIsCreatingOrganization(false);
     }
   };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <OrganizationAvatar
+              orgId={generateId()}
+              orgName={form.watch("name")}
+              className="w-10 h-10"
+            />
+            <div className="flex flex-col">
+              <TextEllipsis width={140}>{form.watch("name")}</TextEllipsis>
+              <TextEllipsis width={140} className="text-xs">
+                {form.watch("slug")}
+              </TextEllipsis>
+            </div>
+          </div>
           <FormField
             control={form.control}
             name="name"
@@ -126,8 +157,14 @@ export function CreateOrganizationForm({
               <FormItem>
                 <FormLabel>Slug</FormLabel>
                 <FormControl>
-                  <Input
+                  <InputWithAdornment
                     {...field}
+                    startAdornment="/organizations/"
+                    endAdornment={
+                      isValidatingSlug && (
+                        <Loader2 className="size-4 animate-spin" />
+                      )
+                    }
                     placeholder="acme-inc"
                     onChange={(e) => {
                       field.onChange(e);
@@ -135,14 +172,6 @@ export function CreateOrganizationForm({
                     }}
                   />
                 </FormControl>
-                {isValidatingSlug ? (
-                  <FormDescription>Checking...</FormDescription>
-                ) : (
-                  <FormDescription>
-                    {!form.formState.errors.slug &&
-                      `/organizations/${field.value}`}
-                  </FormDescription>
-                )}
                 <FormMessage />
               </FormItem>
             )}

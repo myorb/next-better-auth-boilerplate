@@ -116,7 +116,10 @@ export function OrganizationAvatar({
   border = false,
 }: OrganizationAvatarProps) {
   const colorStyles = useMemo(() => getColorStyles(orgId), [orgId]);
-  const initials = useMemo(() => getInitials(orgName), [orgName]);
+  const initials = useMemo(() => {
+    if (!orgName) return "UA";
+    return getInitials(orgName);
+  }, [orgName]);
 
   const sizeClasses = {
     sm: "h-6 w-6 text-[10px]",

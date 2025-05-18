@@ -8,6 +8,7 @@ import { appConfig } from "@/constants/config";
 import { cn } from "@/lib/utils";
 import { Organization } from "better-auth/plugins";
 import { Check } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { toast } from "sonner";
 
@@ -21,6 +22,8 @@ export function SwitcherItem({
   setIsLoading: (loading: boolean) => void;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const pathAfterSlug = pathname.split("/").slice(3).join("/");
 
   const onSubmit = async () => {
     try {
@@ -38,8 +41,11 @@ export function SwitcherItem({
   return (
     <DropdownMenuItem
       onClick={() => {
+        if (activeOrganizationId === organization.id) return;
         onSubmit();
-        router.replace(`${appConfig.authRoutes.default}/${organization.slug}`);
+        router.replace(
+          `${appConfig.authRoutes.default}/${organization.slug}/${pathAfterSlug}`
+        );
       }}
       className={cn(
         "gap-2 p-2",
