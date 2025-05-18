@@ -13,7 +13,7 @@ import {
   Users2Icon
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import {
@@ -49,6 +49,9 @@ export function SidebarCommand({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   const router = useRouter();
+  const params = useParams<{ slug: string }>();
+  const slug = params.slug;
+
   const { data: session } = authClient.useSession();
   const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
@@ -81,13 +84,13 @@ export function SidebarCommand({
         {
           icon: SettingsIcon,
           label: "Settings",
-          href: "/settings",
+          href: `${appConfig.authRoutes.default}/${slug}/settings`,
           keywords: ["preferences", "config", "options"],
         },
         {
           icon: Users2Icon,
           label: "Members",
-          href: "/members",
+          href: `${appConfig.authRoutes.default}/${slug}/members`,
           keywords: ["users", "collaborators", "invite"],
         },
       ],

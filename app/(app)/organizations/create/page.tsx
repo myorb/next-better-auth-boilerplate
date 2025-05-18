@@ -18,20 +18,20 @@ export default function CreateOrganizationPage() {
   return (
     <div className="flex flex-col gap-4 h-svh justify-center items-center">
       <Card className="w-full max-w-xs sm:max-w-sm">
-        <CardHeader>
-          <IconFlowerFilled className="size-8 mb-4" />
+        <CardHeader className="flex flex-col gap-2 items-center">
+          <IconFlowerFilled className="size-8" />
           <CardTitle className="flex items-center justify-between">
             <span>Create Organization</span>
-            <Link
-              href={appConfig.authRoutes.default}
-              className="text-muted-foreground text-sm hover:text-primary underline underline-offset-3"
-            >
-              View all
-            </Link>
           </CardTitle>
           <CardDescription>
             Create a new organization to get started
           </CardDescription>
+          <Link
+            href={appConfig.authRoutes.default}
+            className="text-muted-foreground text-sm hover:text-primary underline underline-offset-3"
+          >
+            View all
+          </Link>
         </CardHeader>
         <CardContent>
           <CreateOrganizationForm

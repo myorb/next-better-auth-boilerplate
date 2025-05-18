@@ -15,11 +15,9 @@ import { toast } from "sonner";
 export function SwitcherItem({
   organization,
   activeOrganizationId,
-  setIsLoading,
 }: {
   organization: Organization;
   activeOrganizationId: string;
-  setIsLoading: (loading: boolean) => void;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -27,20 +25,18 @@ export function SwitcherItem({
 
   const onSubmit = async () => {
     try {
-      setIsLoading(true);
       const { error } = await setActiveOrganization(organization.slug);
       if (error) toast.error("Failed to switch organization");
     } catch (error) {
       console.error(error);
       toast.error("Failed to switch organization");
-    } finally {
-      setIsLoading(false);
     }
   };
 
   return (
     <DropdownMenuItem
-      onClick={() => {
+      onClick={(e) => {
+        e.preventDefault();
         if (activeOrganizationId === organization.id) return;
         onSubmit();
         router.replace(
@@ -59,10 +55,7 @@ export function SwitcherItem({
       />
       <div className="flex flex-col">
         <TextEllipsis width={140}>{organization.name}</TextEllipsis>
-        <TextEllipsis
-          width={140}
-          className="text-[11px] text-muted-foreground"
-        >
+        <TextEllipsis width={140} className="text-[11px] text-muted-foreground">
           {organization.slug}
         </TextEllipsis>
       </div>

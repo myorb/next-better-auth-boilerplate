@@ -6,7 +6,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { appConfig } from "@/constants/config";
-import { Home, Settings, Users } from "lucide-react";
+import { Home } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
@@ -22,13 +22,13 @@ export function NavPlatform() {
       icon: Home,
       isActive: false,
     },
-    {
-      id: "members",
-      title: "Members",
-      url: `${appConfig.authRoutes.default}/${slug}/members`,
-      icon: Users,
-      isActive: false,
-    },
+    // {
+    //   id: "members",
+    //   title: "Members",
+    //   url: `${appConfig.authRoutes.default}/${slug}/members`,
+    //   icon: Users,
+    //   isActive: false,
+    // },
     // {
     //   id: "domains",
     //   title: "Domains",
@@ -43,13 +43,13 @@ export function NavPlatform() {
     //   icon: CreditCard,
     //   isActive: false,
     // },
-    {
-      id: "settings",
-      title: "Settings",
-      url: `${appConfig.authRoutes.default}/${slug}/settings`,
-      icon: Settings,
-      isActive: false,
-    },
+    // {
+    //   id: "settings",
+    //   title: "Settings",
+    //   url: `${appConfig.authRoutes.default}/${slug}/settings`,
+    //   icon: Settings,
+    //   isActive: false,
+    // },
   ];
 
   return (

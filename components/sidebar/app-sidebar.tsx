@@ -1,5 +1,5 @@
 import { NavUser } from "@/components/sidebar/nav-user";
-import { OrganizationsSwitcher } from "@/components/sidebar/organization-switcher";
+import { OrganizationSwitcher } from "@/components/sidebar/organization-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -18,7 +18,7 @@ export async function AppSidebar({ ...props }: AppSidebarProps) {
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
-        <OrganizationsSwitcher />
+        <OrganizationSwitcher />
         <SidebarCommand />
         <NavPlatform />
       </SidebarHeader>
