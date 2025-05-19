@@ -30,12 +30,12 @@ import { authClient } from "@/lib/auth-client";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
+import { ProfileDialog } from "@/components/profile/components/profile-dialog";
+import { useState } from "react";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const router = useRouter();
-  const params = useParams<{ slug: string }>();
-  const slug = params.slug;
 
   const { data: session } = authClient.useSession();
   const { theme, setTheme } = useTheme();
@@ -92,14 +92,17 @@ export function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem
-                onClick={() =>
-                  router.push(
-                    `${appConfig.authRoutes.default}/${slug}${appConfig.appRoutes.userProfile}`
-                  )
-                }
+                onClick={(e) => e.preventDefault()}
+                className="w-full cursor-pointer"
               >
-                <Settings />
-                Your Settings
+                <ProfileDialog
+                  trigger={
+                    <div className="flex items-center gap-2">
+                      <Settings className="size-4" />
+                      <span className="text-sm">Profile Settings</span>
+                    </div>
+                  }
+                />
               </DropdownMenuItem>
               <DropdownMenuItem disabled>
                 <Bell />
