@@ -3,6 +3,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { auth } from "./auth";
 import { authClient } from "./auth-client";
+import * as UAParser from "ua-parser-js";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -22,3 +23,22 @@ export const getErrorMessage = (code: string) => {
   }
   return "An error occurred";
 };
+
+/**
+ * Parses a user agent string and returns device and browser info using ua-parser-js.
+ * @param userAgent The user agent string
+ * @returns { device: string, browser: string }
+ */
+export function parseUserAgent(userAgent?: string): {
+  device: string;
+  browser: string;
+} {
+  if (!userAgent) return { device: "Unknown", browser: "Unknown" };
+  const parser = new UAParser.UAParser(userAgent);
+  const os = parser.getOS();
+  const browser = parser.getBrowser();
+  return {
+    device: os.name || "Unknown",
+    browser: browser.name || "Unknown",
+  };
+}

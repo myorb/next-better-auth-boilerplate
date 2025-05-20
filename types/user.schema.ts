@@ -1,0 +1,26 @@
+import { z } from "zod";
+
+export const updateUserNameSchema = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+});
+
+export type UpdateUserName = z.infer<typeof updateUserNameSchema>;
+
+export const setPasswordSchema = z.object({
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters long" }),
+});
+
+export type SetPasswordForm = z.infer<typeof setPasswordSchema>;
+
+export const changePasswordSchema = z.object({
+  currentPassword: z
+    .string()
+    .min(8, { message: "Current password must be at least 8 characters long" }),
+  newPassword: z
+    .string()
+    .min(8, { message: "New password must be at least 8 characters long" }),
+});
+
+export type ChangePasswordForm = z.infer<typeof changePasswordSchema>;

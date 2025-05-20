@@ -17,16 +17,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { updateOrganizationSchema } from "@/types/organization.schema";
+import { UpdateOrganization } from "@/types/organization.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Organization } from "better-auth/plugins";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-const updateOrganizationSchema = z.object({
-  name: z.string().min(1, { message: "Name is required" }),
-});
-
-type UpdateOrganization = z.infer<typeof updateOrganizationSchema>;
 
 export function UpdateOrganizationName({
   organization,
@@ -81,7 +77,7 @@ export function UpdateOrganizationName({
             <p className="text-sm text-muted-foreground">
               This action will update the name of the organization.
             </p>
-            <Button type="submit" loading={isUpdating}>
+            <Button type="submit" size="sm" loading={isUpdating}>
               Update Name
             </Button>
           </CardFooter>

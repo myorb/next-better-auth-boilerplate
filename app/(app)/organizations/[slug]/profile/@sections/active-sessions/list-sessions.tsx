@@ -1,0 +1,113 @@
+"use client";
+
+import { onRevokeOtherSessions, onRevokeSession } from "@/actions/sessions";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { appConfig } from "@/constants/config";
+import { useServerAction } from "@/hooks/use-server-action";
+import { authClient } from "@/lib/auth-client";
+import { parseUserAgent } from "@/lib/utils";
+import { Session } from "better-auth";
+import { Laptop } from "lucide-react";
+import { useRouter } from "nextjs-toploader/app";
+import { useState } from "react";
+
+interface ListSessionsProps {
+  sessions: Session[];
+  currentSessionId: string;
+}
+
+export default function ListSessions({
+  sessions,
+  currentSessionId,
+}: ListSessionsProps) {
+  const router = useRouter();
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
+    null
+  );
+  const { execute, isLoading } = useServerAction({
+    action: onRevokeSession,
+  });
+
+  const { execute: revokeOtherSessions, isLoading: isRevokingOtherSessions } =
+    useServerAction({
+      action: onRevokeOtherSessions,
+    });
+
+  return (
+    <Card className="bg-card text-card-foreground rounded-2xl border shadow-sm">
+      <CardHeader>
+        <CardTitle>Sessions</CardTitle>
+        <CardDescription>
+          Manage your active sessions and revoke access.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        {sessions.map((session) => {
+          const isCurrent = session.id === currentSessionId;
+          const { browser, device } = parseUserAgent(
+            session.userAgent ?? undefined
+          );
+          return (
+            <div
+              key={session.id}
+              className="flex items-center justify-between rounded-xl border px-6 py-4 bg-background/50"
+            >
+              <div className="flex items-center gap-3">
+                <Laptop className="w-5 h-5 text-muted-foreground" />
+                <span className="font-medium text-sm">
+                  {isCurrent ? "Current Session" : `${browser}, ${device}`}
+                </span>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedSessionId(session.id);
+                  if (isCurrent) {
+                    authClient.signOut({
+                      fetchOptions: {
+                        onSuccess: () => {
+                          router.push(appConfig.authRoutes.default);
+                        },
+                      },
+                    });
+                  } else {
+                    execute({ token: session.token });
+                  }
+                }}
+                loading={isLoading && selectedSessionId === session.id}
+                disabled={isLoading && selectedSessionId === session.id}
+              >
+                {isCurrent ? "Sign Out" : "Revoke"}
+              </Button>
+            </div>
+          );
+        })}
+      </CardContent>
+      <Separator />
+      <CardFooter className="flex flex-row justify-between gap-4">
+        <p className="text-sm text-muted-foreground">
+          This action will revoke all sessions except the current one.
+        </p>
+        <Button
+          type="submit"
+          size="sm"
+          loading={isRevokingOtherSessions}
+          disabled={isRevokingOtherSessions || sessions.length <= 1}
+          onClick={() => revokeOtherSessions({})}
+        >
+          Revoke Other Sessions
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}

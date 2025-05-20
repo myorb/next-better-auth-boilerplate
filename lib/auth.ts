@@ -11,12 +11,14 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import {
+  apiKey,
   emailOTP,
   magicLink,
   organization,
   twoFactor,
 } from "better-auth/plugins";
 import { resend } from "./resend";
+import { ChangeEmailVerificationEmail } from "@/emails/change-email-verification";
 
 export const auth = betterAuth({
   appName: "Next Better Auth Neon Boilerplate",
@@ -27,6 +29,31 @@ export const auth = betterAuth({
     cookieCache: {
       enabled: true,
       maxAge: 5 * 60, // Cache duration in seconds
+    },
+  },
+  user: {
+    changeEmail: {
+      enabled: true,
+      sendChangeEmailVerification: async ({ user, newEmail, url, token }) => {
+        await resend.emails.send({
+          from: process.env.BETTER_AUTH_EMAIL_FROM!,
+          to: user.email, // verification email must be sent to the current user email to approve the change
+          subject: "Approve email change",
+          react: ChangeEmailVerificationEmail({
+            url,
+            newEmailAddress: newEmail,
+            expiresIn: "24 hours",
+          }),
+          text: await render(
+            ChangeEmailVerificationEmail({
+              url,
+              newEmailAddress: newEmail,
+              expiresIn: "24 hours",
+            }),
+            { plainText: true }
+          ),
+        });
+      },
     },
   },
   emailAndPassword: {
@@ -50,7 +77,13 @@ export const auth = betterAuth({
   account: {
     accountLinking: {
       enabled: true,
-      trustedProviders: ["google", "email-password"],
+      trustedProviders: [
+        "google",
+        "email-password",
+        "github",
+        "facebook",
+        "apple",
+      ],
     },
   },
   socialProviders: {
@@ -189,5 +222,6 @@ export const auth = betterAuth({
         }
       },
     }),
+    apiKey(),
   ],
 });

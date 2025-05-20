@@ -150,7 +150,12 @@ export function UpdateOrganizationSlug({
             <p className="text-sm text-muted-foreground">
               Use only lowercase letters, numbers, and hyphens.
             </p>
-            <Button type="submit" disabled={disabledForm} loading={isUpdating}>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={disabledForm}
+              loading={isUpdating}
+            >
               Update Slug
             </Button>
           </CardFooter>
