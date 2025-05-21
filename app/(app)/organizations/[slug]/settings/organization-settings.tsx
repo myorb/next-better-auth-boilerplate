@@ -34,9 +34,7 @@ export function OrganizationSettings({
 
       <UpdateOrganizationSlug organization={organization} />
 
-      <h2 className="text-2xl font-bold">Danger Zone</h2>
-
-      <Card className="border-destructive">
+      <Card>
         <CardHeader>
           <CardTitle>Danger Zone</CardTitle>
           <CardDescription>
@@ -51,16 +49,14 @@ export function OrganizationSettings({
               cannot be undone.
             </p>
           </AlertDestructive> */}
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Warning!</AlertTitle>
-            <AlertDescription>
-              Deleting your organization will permanently remove all associated
-              data, including workspaces, forms, and responses. This action
-              cannot be undone.
-            </AlertDescription>
-          </Alert>
-          <Button variant="destructive">Delete Organization</Button>
+          <p className="text-sm text-destructive">
+            Deleting your organization will permanently remove all associated
+            data, including workspaces, forms, and responses. This action cannot
+            be undone.
+          </p>
+          <Button variant="destructive" size="sm">
+            Delete Organization
+          </Button>
         </CardContent>
       </Card>
     </div>

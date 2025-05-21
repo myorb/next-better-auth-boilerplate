@@ -101,7 +101,7 @@ export function SidebarCommand({
         {
           icon: UserIcon,
           label: "Profile",
-          href: "/user/profile",
+          href: `${appConfig.authRoutes.default}/${slug}/profile/personal-details`,
           keywords: ["personal", "details", "account"],
         },
         {

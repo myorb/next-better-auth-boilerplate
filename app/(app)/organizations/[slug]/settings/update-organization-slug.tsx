@@ -156,7 +156,7 @@ export function UpdateOrganizationSlug({
               disabled={disabledForm}
               loading={isUpdating}
             >
-              Update Slug
+              Save
             </Button>
           </CardFooter>
         </Card>
