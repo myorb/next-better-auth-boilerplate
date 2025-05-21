@@ -19,14 +19,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
 import { DeleteUserForm, deleteUserSchema } from "@/types/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { error } from "console";
+import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function DangerZone() {
+  const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const form = useForm<DeleteUserForm>({
     resolver: zodResolver(deleteUserSchema),
@@ -37,12 +41,14 @@ export default function DangerZone() {
   const onSubmit = async (value: DeleteUserForm) => {
     try {
       setIsDeleting(true);
-      const { data, error } = await authClient.deleteUser({
+      const { error } = await authClient.deleteUser({
         password: value.password,
       });
       if (error) throw new Error(error.message);
-      else toast.success("Account deleted successfully");
-      console.log(data);
+      else {
+        toast.success("Account deleted successfully");
+        router.push(appConfig.authRoutes.default);
+      }
     } catch (error) {
       console.error(error);
       toast.error("Failed to delete account");
@@ -70,7 +76,7 @@ export default function DangerZone() {
                 <FormItem>
                   <FormLabel>Please enter your password</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="********" />
+                    <Input {...field} placeholder="********" type="password" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
