@@ -1,7 +1,13 @@
 "use client";
 
 import { MainLayout } from "@/components/sidebar/main-layout";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -12,13 +18,13 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { appConfig } from "@/constants/config";
 import { IconBrandOauth } from "@tabler/icons-react";
-import { Key, Monitor, Shield, Trash, Users2 } from "lucide-react";
+import { ChevronDown, Key, Monitor, Shield, Trash, Users2 } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
-import React, { Suspense } from "react";
+import React from "react";
+import MainSectionArea from "./main-section-area";
 
 const profileSectionNav: {
   key: string;
@@ -86,7 +92,7 @@ export default function ProfileLayout({
 
   return (
     <MainLayout breadcrumbs={[{ label: "Profile" }]}>
-      <SidebarProvider className="flex flex-col md:flex-row min-h-[100vh-2rem]">
+      <SidebarProvider className="flex flex-col md:flex-row min-h-[calc(100vh-2rem)]">
         <Sidebar collapsible="none" className="hidden md:flex rounded-lg">
           <SidebarContent>
             <SidebarGroup>
@@ -112,20 +118,30 @@ export default function ProfileLayout({
             </SidebarGroup>
           </SidebarContent>
         </Sidebar>
-        <main className="flex flex-1 flex-col overflow-hidden gap-4 px-0 md:px-4">
-          <ScrollArea className="flex flex-1 flex-col gap-4 h-[calc(100vh-10rem)]">
-            <Suspense
-              fallback={
-                <div className="flex flex-col gap-4">
-                  <Skeleton className="h-40" />
-                  <Skeleton className="h-40" />
-                </div>
-              }
-            >
-              {sections}
-            </Suspense>
-          </ScrollArea>
-        </main>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild className="flex md:hidden mb-4 mt-2">
+            <Button variant="outline" className="w-fit self-end">
+              {activeItem?.name}
+              <ChevronDown className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56">
+            {profileSectionNav.map((item) => (
+              <DropdownMenuItem
+                key={item.key}
+                onClick={() =>
+                  router.push(
+                    `${appConfig.authRoutes.default}/${slug}/${item.href}`
+                  )
+                }
+              >
+                <item.icon />
+                <span>{item.name}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <MainSectionArea sections={sections} />
       </SidebarProvider>
     </MainLayout>
   );
