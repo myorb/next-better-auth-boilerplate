@@ -20,7 +20,8 @@ export const onRevokeSession = validatedActionWithUser(
       });
 
       revalidatePath(
-        `${appConfig.authRoutes.default}/[slug]/profile/active-sessions`
+        `${appConfig.authRoutes.default}/[slug]/profile/active-sessions`,
+        "page"
       );
       return successResponse("Session revoked successfully");
     } catch (error) {
@@ -42,7 +43,8 @@ export const onRevokeOtherSessions = validatedActionWithUser(
       });
 
       revalidatePath(
-        `${appConfig.authRoutes.default}/[slug]/profile/active-sessions`
+        `${appConfig.authRoutes.default}/[slug]/profile/active-sessions`,
+        "page"
       );
       return successResponse("All sessions revoked successfully");
     } catch (error) {

@@ -48,7 +48,7 @@ export default function SetPassword() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Password</CardTitle>
+              <CardTitle>Set Password</CardTitle>
             </CardHeader>
             <CardContent>
               <FormField

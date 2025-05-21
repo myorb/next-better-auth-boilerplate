@@ -37,7 +37,8 @@ export const onUnlinkAccount = validatedActionWithUser(
         headers: await headers(),
       });
       revalidatePath(
-        `${appConfig.authRoutes.default}/[slug]/profile/providers`
+        `${appConfig.authRoutes.default}/[slug]/profile/providers`,
+        "page"
       );
       return successResponse("Account unlinked successfully");
     } catch (error) {

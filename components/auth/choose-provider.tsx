@@ -1,11 +1,34 @@
 import { Button } from "@/components/ui/button";
 import { appConfig } from "@/constants/config";
+import { authClient } from "@/lib/auth-client";
 import { IconKey, IconMail } from "@tabler/icons-react";
 import { useRouter } from "nextjs-toploader/app";
 import { GoogleSignInButton } from "./google";
+import { useEffect } from "react";
 
 export function ChooseProvider() {
   const router = useRouter();
+
+  useEffect(() => {
+    if (
+      !PublicKeyCredential.isConditionalMediationAvailable ||
+      !PublicKeyCredential.isConditionalMediationAvailable()
+    ) {
+      return;
+    }
+
+    void authClient.signIn.passkey({ autoFill: true });
+  }, []);
+
+  const handleSignInWithPasskey = async () => {
+    try {
+      await authClient.signIn.passkey();
+      router.push(appConfig.authRoutes.onboarding);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <Button
@@ -29,7 +52,7 @@ export function ChooseProvider() {
         variant="secondary"
         className="w-full"
         icon={<IconKey />}
-        disabled
+        onClick={handleSignInWithPasskey}
       >
         Passkey
       </Button>

@@ -14,6 +14,7 @@ import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "nextjs-toploader/app";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -28,6 +29,7 @@ const signinSchema = z.object({
 type SigninUser = z.infer<typeof signinSchema>;
 
 export function SigninForm() {
+  const router = useRouter();
   const form = useForm<SigninUser>({
     resolver: zodResolver(signinSchema),
     defaultValues: { email: "", password: "" },
@@ -46,12 +48,17 @@ export function SigninForm() {
           onError: (ctx) => {
             toast.error(ctx.error.message);
           },
-          onSuccess: () => {
-            toast.success("Signed in successfully");
+          onSuccess: (ctx) => {
+            if (ctx.data.twoFactorRedirect) {
+              router.push(appConfig.authRoutes.verify2fa);
+            } else {
+              toast.success("Signed in successfully");
+            }
           },
         }
       );
     } catch (error) {
+      console.error(error);
       toast.error("Error signing in");
     } finally {
       form.reset();

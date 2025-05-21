@@ -23,7 +23,8 @@ export const onUpdateUserName = validatedActionWithUser(
       });
 
       revalidatePath(
-        `${appConfig.authRoutes.default}/[slug]/profile/personal-details`
+        `${appConfig.authRoutes.default}/[slug]/profile/personal-details`,
+        "page"
       );
       return successResponse("Profile details updated successfully");
     } catch (error) {
@@ -47,7 +48,10 @@ export const onSetPassword = validatedActionWithUser(
         headers: await headers(),
       });
 
-      revalidatePath(`${appConfig.authRoutes.default}/[slug]/profile/security`);
+      revalidatePath(
+        `${appConfig.authRoutes.default}/[slug]/profile/security`,
+        "page"
+      );
       return successResponse("Password updated successfully");
     } catch (error) {
       console.error(error);
@@ -75,7 +79,10 @@ export const onChangePassword = validatedActionWithUser(
         headers: await headers(),
       });
 
-      revalidatePath(`${appConfig.authRoutes.default}/[slug]/profile/security`);
+      revalidatePath(
+        `${appConfig.authRoutes.default}/[slug]/profile/security`,
+        "page"
+      );
       return successResponse("Password changed successfully");
     } catch (error) {
       console.error(error);

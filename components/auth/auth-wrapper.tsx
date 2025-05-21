@@ -80,6 +80,7 @@ export default function AuthWrapper({ title, description, view }: Readonly<AuthW
       case "signin-otp":
       case "magic-link":
       case "verify-otp":
+      case "verify-2fa":
         return (
           <div className="text-xs text-center text-muted-foreground">
             <Link

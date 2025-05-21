@@ -14,13 +14,21 @@ export const setPasswordSchema = z.object({
 
 export type SetPasswordForm = z.infer<typeof setPasswordSchema>;
 
-export const changePasswordSchema = z.object({
-  currentPassword: z
-    .string()
-    .min(8, { message: "Current password must be at least 8 characters long" }),
-  newPassword: z
-    .string()
-    .min(8, { message: "New password must be at least 8 characters long" }),
-});
-
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(8, {
+      message: "Current password must be at least 8 characters long",
+    }),
+    newPassword: z
+      .string()
+      .min(8, { message: "New password must be at least 8 characters long" }),
+  })
+  .superRefine(({ newPassword, currentPassword }, ctx) => {
+    if (newPassword === currentPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "New password cannot be the same as the current password",
+      });
+    }
+  });
 export type ChangePasswordForm = z.infer<typeof changePasswordSchema>;

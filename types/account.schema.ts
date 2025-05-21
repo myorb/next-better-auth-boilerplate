@@ -14,3 +14,22 @@ export const unlinkAccountSchema = z.object({
 });
 
 export type UnlinkAccountSchema = z.infer<typeof unlinkAccountSchema>;
+
+
+export const enableTwoFactorSchema = z.object({
+  password: z.string().min(8),
+});
+
+export type EnableTwoFactorSchema = z.infer<typeof enableTwoFactorSchema>;
+
+export const disableTwoFactorSchema = z.object({
+  password: z.string().min(8),
+});
+
+export type DisableTwoFactorSchema = z.infer<typeof disableTwoFactorSchema>;
+
+export const verifyTwoFactorSchema = z.object({
+  code: z.string().min(6),
+});
+
+export type VerifyTwoFactorSchema = z.infer<typeof verifyTwoFactorSchema>;

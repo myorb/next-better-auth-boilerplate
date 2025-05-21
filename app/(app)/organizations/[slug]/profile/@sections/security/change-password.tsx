@@ -1,6 +1,5 @@
 "use client";
 
-import { onChangePassword } from "@/actions/users";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,26 +18,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useServerAction } from "@/hooks/use-server-action";
+import { authClient } from "@/lib/auth-client";
 import { ChangePasswordForm, changePasswordSchema } from "@/types/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "nextjs-toploader/app";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function ChangePassword() {
   const router = useRouter();
 
-  const { execute, isLoading } = useServerAction({
-    action: onChangePassword,
-    onSuccess: () => {
-      toast.success("Password changed successfully");
-      form.reset();
-      router.refresh();
-    },
-    onError: () => toast.error("Failed to change password"),
-  });
-
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<ChangePasswordForm>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: { currentPassword: "", newPassword: "" },
@@ -46,7 +37,22 @@ export default function ChangePassword() {
   });
 
   const onSubmit = async (data: ChangePasswordForm) => {
-    await execute(data);
+    try {
+      console.log(data);
+      setIsLoading(true);
+      await authClient.changePassword({
+        newPassword: data.newPassword,
+        currentPassword: data.currentPassword,
+        revokeOtherSessions: true,
+      });
+      toast.success("Password changed successfully");
+      form.reset();
+      router.refresh();
+    } catch (error) {
+      toast.error("Failed to change password");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

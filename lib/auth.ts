@@ -19,6 +19,7 @@ import {
 } from "better-auth/plugins";
 import { resend } from "./resend";
 import { ChangeEmailVerificationEmail } from "@/emails/change-email-verification";
+import { passkey } from "better-auth/plugins/passkey";
 
 export const auth = betterAuth({
   appName: "Next Better Auth Neon Boilerplate",
@@ -118,6 +119,9 @@ export const auth = betterAuth({
   },
   plugins: [
     twoFactor({
+      totpOptions: {
+        digits: 6,
+      },
       otpOptions: {
         digits: 6,
         period: 300, // 5 minutes
@@ -223,5 +227,10 @@ export const auth = betterAuth({
       },
     }),
     apiKey(),
+    passkey({
+      rpID: "localhost",
+      rpName: "Next Better Auth Neon Boilerplate",
+      origin: process.env.BETTER_AUTH_URL!,
+    }),
   ],
 });

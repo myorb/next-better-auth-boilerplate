@@ -20,6 +20,7 @@ import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import router from "next/router";
+import { useRouter } from "nextjs-toploader/app";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -31,6 +32,7 @@ const verify2FaUserSchema = z.object({
 type Verify2FaUser = z.infer<typeof verify2FaUserSchema>;
 
 export function Verify2FaForm() {
+  const router = useRouter();
   const form = useForm<Verify2FaUser>({
     resolver: zodResolver(verify2FaUserSchema),
     defaultValues: { otp: "" },
@@ -39,18 +41,15 @@ export function Verify2FaForm() {
 
   const onSubmit = async (formData: Verify2FaUser) => {
     try {
-      await authClient.twoFactor.verifyOtp(
-        { code: formData.otp },
-        {
-          onError(ctx) {
-            toast.error(ctx.error.message);
-          },
-          onSuccess() {
-            toast.success("Code verified successfully");
-            router.push(appConfig.authRoutes.onboarding);
-          },
-        }
-      );
+      const { data, error } = await authClient.twoFactor.verifyTotp({
+        code: formData.otp,
+        trustDevice: true,
+      });
+      if (error) toast.error(error.message);
+      if (data) {
+        router.push(appConfig.authRoutes.onboarding);
+        toast.success("Code verified successfully");
+      }
     } catch (error) {
       toast.error("Error verifying code");
     } finally {
