@@ -12,6 +12,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { appConfig } from "@/constants/config";
 import { IconBrandOauth } from "@tabler/icons-react";
 import { Key, Monitor, Shield, Trash, Users2 } from "lucide-react";
@@ -85,7 +86,7 @@ export default function ProfileLayout({
 
   return (
     <MainLayout breadcrumbs={[{ label: "Profile" }]}>
-      <SidebarProvider className="flex flex-col md:flex-row">
+      <SidebarProvider className="flex flex-col md:flex-row min-h-[100vh-2rem]">
         <Sidebar collapsible="none" className="hidden md:flex rounded-lg">
           <SidebarContent>
             <SidebarGroup>
@@ -112,14 +113,17 @@ export default function ProfileLayout({
           </SidebarContent>
         </Sidebar>
         <main className="flex flex-1 flex-col overflow-hidden gap-4 px-0 md:px-4">
-          {/* <div className="flex flex-col">
-            <h1 className="text-2xl font-bold">{activeItem?.name}</h1>
-            <p className="text-sm text-muted-foreground">
-              {activeItem?.description}
-            </p>
-          </div> */}
           <ScrollArea className="flex flex-1 flex-col gap-4 h-[calc(100vh-10rem)]">
-            <Suspense fallback="Loading...">{sections}</Suspense>
+            <Suspense
+              fallback={
+                <div className="flex flex-col gap-4">
+                  <Skeleton className="h-40" />
+                  <Skeleton className="h-40" />
+                </div>
+              }
+            >
+              {sections}
+            </Suspense>
           </ScrollArea>
         </main>
       </SidebarProvider>

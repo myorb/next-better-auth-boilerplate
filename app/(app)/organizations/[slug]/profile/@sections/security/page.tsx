@@ -1,5 +1,4 @@
 import { auth } from "@/lib/auth";
-import { authClient } from "@/lib/auth-client";
 import { headers } from "next/headers";
 import ChangePassword from "./change-password";
 import EnableTwoFactor from "./enable-two-factor";
