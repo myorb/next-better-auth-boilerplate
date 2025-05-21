@@ -63,11 +63,11 @@ const profileSectionNav: {
     href: "/profile/active-sessions",
   },
   {
-    key: "delete-zone",
-    name: "Delete Zone",
+    key: "danger-zone",
+    name: "Danger Zone",
     description: "Delete your account",
     icon: Trash,
-    href: "/profile/delete-zone",
+    href: "/profile/danger-zone",
   },
 ];
 

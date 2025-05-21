@@ -32,3 +32,13 @@ export const changePasswordSchema = z
     }
   });
 export type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
+
+
+export const deleteUserSchema = z.object({
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters long" }),
+});
+
+export type DeleteUserForm = z.infer<typeof deleteUserSchema>;
+
