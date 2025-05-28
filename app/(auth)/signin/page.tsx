@@ -1,20 +1,22 @@
 import AuthWrapper from "@/components/auth/auth-wrapper";
 import { Metadata } from "next";
 
-const title = "Sign in | Vaanix";
-const description = "Sign in to Vaanix";
+const title = "Sign in | Next Better Auth Boilerplate";
+const description = "Sign in to Next Better Auth Boilerplate";
 const image = `/api/og?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}&type=home`;
 
 export const metadata: Metadata = {
   title,
   description,
-  alternates: { canonical: "https://vaanix.in/signin" },
-  keywords: ["Sign in", "Vaanix", "Sign in to Vaanix"],
+  alternates: {
+    canonical: "https://next-better-auth-boilerplate.vercel.app/signin",
+  },
+  keywords: ["Sign in", "Next Better Auth", "Sign in to Next Better Auth"],
   openGraph: {
     title,
     description,
-    url: "https://vaanix.in/signin",
-    siteName: "Vaanix",
+    url: "https://next-better-auth-boilerplate.vercel.app/signin",
+    siteName: "Next Better Auth Boilerplate",
     type: "website",
     locale: "en_US",
     images: [image],
@@ -24,7 +26,7 @@ export const metadata: Metadata = {
     title,
     description,
     images: [image],
-    site: "Vaanix",
+    site: "Next Better Auth Boilerplate",
   },
 };
 

@@ -131,7 +131,7 @@ export const auth = betterAuth({
           await resend.emails.send({
             from: process.env.BETTER_AUTH_EMAIL_FROM!,
             to: user.email,
-            subject: "2FA OTP for Vaanix",
+            subject: "2FA OTP for Next Better Auth Boilerplate",
             react: TwoFactorOtpEmail({
               otpCode: otp,
               expiresIn: "5 minutes",
@@ -175,7 +175,7 @@ export const auth = betterAuth({
         await resend.emails.send({
           from: process.env.BETTER_AUTH_EMAIL_FROM!,
           to: email,
-          subject: "Magic Link for Vaanix",
+          subject: "Magic Link for Next Better Auth Boilerplate",
           react: MagicLinkEmail({ magicLink: url }),
           text: await render(MagicLinkEmail({ magicLink: url }), {
             plainText: true,
@@ -194,7 +194,7 @@ export const auth = betterAuth({
           await resend.emails.send({
             from: process.env.BETTER_AUTH_EMAIL_FROM!,
             to: email,
-            subject: "Sign in to Vaanix",
+            subject: "Sign in to Next Better Auth Boilerplate",
             react: SigninOtpVerificationEmail({
               verificationCode: otp,
               expiresIn: "5 minutes",
