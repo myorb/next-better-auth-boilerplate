@@ -3,8 +3,9 @@ import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
 import { IconKey, IconMail } from "@tabler/icons-react";
 import { useRouter } from "nextjs-toploader/app";
-import { GoogleSignInButton } from "./google";
 import { useEffect } from "react";
+import { GithubSignInButton } from "./github";
+import { GoogleSignInButton } from "./google";
 
 export function ChooseProvider() {
   const router = useRouter();
@@ -48,6 +49,7 @@ export function ChooseProvider() {
         Sign in with OTP
       </Button>
       <GoogleSignInButton />
+      <GithubSignInButton />
       <Button
         variant="secondary"
         className="w-full"

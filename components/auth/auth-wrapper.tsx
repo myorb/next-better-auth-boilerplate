@@ -122,7 +122,10 @@ export default function AuthWrapper({ title, description, view }: Readonly<AuthW
     <Card className="w-full max-w-xs sm:max-w-sm pb-0 relative">
       <CardHeader className="shadow-xs border-none bg-transparent">
         <div className="flex flex-col items-center text-center gap-2">
-          <IconFlowerFilled className="w-10 h-10" />
+          <IconFlowerFilled
+            className="size-10 cursor-pointer"
+            onClick={() => router.push("/")}
+          />
           <CardTitle className="text-xl font-semibold">{title}</CardTitle>
           <CardDescription className="text-sm text-muted-foreground">
             {description}
