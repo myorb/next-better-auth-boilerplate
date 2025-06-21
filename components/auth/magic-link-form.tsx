@@ -34,7 +34,7 @@ export function MagicLinkForm() {
     try {
       const { error } = await authClient.signIn.magicLink({
         email: formData.email,
-        callbackURL: appConfig.authRoutes.onboarding,
+        callbackURL: appConfig.authRoutes.default,
       });
       if (error) toast.error(error.message);
       else toast.success("Magic link sent to email");

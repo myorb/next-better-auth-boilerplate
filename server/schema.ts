@@ -1,9 +1,9 @@
 import {
+  boolean,
+  integer,
   pgTable,
   text,
   timestamp,
-  boolean,
-  integer,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -14,7 +14,6 @@ export const users = pgTable("users", {
   image: text("image"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
-  twoFactorEnabled: boolean("two_factor_enabled"),
 });
 
 export const sessions = pgTable("sessions", {
@@ -28,7 +27,6 @@ export const sessions = pgTable("sessions", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  activeOrganizationId: text("active_organization_id"),
 });
 
 export const accounts = pgTable("accounts", {
@@ -44,7 +42,6 @@ export const accounts = pgTable("accounts", {
   accessTokenExpiresAt: timestamp("access_token_expires_at"),
   refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
   scope: text("scope"),
-  password: text("password"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });
@@ -56,89 +53,4 @@ export const verifications = pgTable("verifications", {
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at"),
   updatedAt: timestamp("updated_at"),
-});
-
-export const twoFactors = pgTable("two_factors", {
-  id: text("id").primaryKey(),
-  secret: text("secret").notNull(),
-  backupCodes: text("backup_codes").notNull(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-});
-
-export const organizations = pgTable("organizations", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").unique(),
-  logo: text("logo"),
-  createdAt: timestamp("created_at").notNull(),
-  metadata: text("metadata"),
-});
-
-export const members = pgTable("members", {
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  role: text("role").notNull(),
-  createdAt: timestamp("created_at").notNull(),
-});
-
-export const invitations = pgTable("invitations", {
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
-  email: text("email").notNull(),
-  role: text("role"),
-  status: text("status").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  inviterId: text("inviter_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-});
-
-export const apiKeys = pgTable("api_keys", {
-  id: text("id").primaryKey(),
-  name: text("name"),
-  start: text("start"),
-  prefix: text("prefix"),
-  key: text("key").notNull(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  refillInterval: integer("refill_interval"),
-  refillAmount: integer("refill_amount"),
-  lastRefillAt: timestamp("last_refill_at"),
-  enabled: boolean("enabled").default(true),
-  rateLimitEnabled: boolean("rate_limit_enabled").default(true),
-  rateLimitTimeWindow: integer("rate_limit_time_window").default(86400000),
-  rateLimitMax: integer("rate_limit_max").default(10),
-  requestCount: integer("request_count"),
-  remaining: integer("remaining"),
-  lastRequest: timestamp("last_request"),
-  expiresAt: timestamp("expires_at"),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
-  permissions: text("permissions"),
-  metadata: text("metadata"),
-});
-
-export const passkeys = pgTable("passkeys", {
-  id: text("id").primaryKey(),
-  name: text("name"),
-  publicKey: text("public_key").notNull(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  credentialID: text("credential_id").notNull(),
-  counter: integer("counter").notNull(),
-  deviceType: text("device_type").notNull(),
-  backedUp: boolean("backed_up").notNull(),
-  transports: text("transports"),
-  createdAt: timestamp("created_at"),
 });

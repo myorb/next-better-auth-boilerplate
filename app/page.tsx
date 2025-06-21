@@ -43,14 +43,14 @@ export default function Home() {
               buttonVariants({ variant: "default" }),
               "w-full sm:w-auto"
             )}
-            href={appConfig.authRoutes.signin}
+            href={appConfig.authRoutes.magicLink}
           >
             Get Started
           </Link>
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link
-              href={appConfig.authRoutes.signin}
+              href={appConfig.authRoutes.magicLink}
               className="text-primary hover:underline"
             >
               Sign in
