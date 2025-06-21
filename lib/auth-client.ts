@@ -1,7 +1,21 @@
-import { magicLinkClient } from "better-auth/client/plugins";
+import {
+  apiKeyClient,
+  emailOTPClient,
+  magicLinkClient,
+  organizationClient,
+  passkeyClient,
+  twoFactorClient,
+} from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 export const authClient = createAuthClient({
   baseURL: process.env.BETTER_AUTH_URL,
-  plugins: [magicLinkClient()],
+  plugins: [
+    magicLinkClient(),
+    twoFactorClient(),
+    emailOTPClient(),
+    organizationClient(),
+    apiKeyClient(),
+    passkeyClient(),
+  ],
 });

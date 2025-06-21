@@ -13,33 +13,47 @@ import { Input } from "@/components/ui/input";
 import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-const magicLinkUserSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
+const resetPasswordUserSchema = z.object({
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters" }),
 });
 
-type MagicLinkUser = z.infer<typeof magicLinkUserSchema>;
+type ResetPasswordUser = z.infer<typeof resetPasswordUserSchema>;
 
-export function MagicLinkForm() {
-  const form = useForm<MagicLinkUser>({
-    resolver: zodResolver(magicLinkUserSchema),
-    defaultValues: { email: "" },
+export function ResetPasswordForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+
+  if (!token) {
+    toast.error("Invalid token");
+    router.push(appConfig.authRoutes.signin);
+  }
+
+  const form = useForm<ResetPasswordUser>({
+    resolver: zodResolver(resetPasswordUserSchema),
+    defaultValues: { password: "" },
     mode: "onChange",
   });
 
-  const onSubmit = async (formData: MagicLinkUser) => {
+  const onSubmit = async (formData: ResetPasswordUser) => {
     try {
-      const { error } = await authClient.signIn.magicLink({
-        email: formData.email,
-        callbackURL: appConfig.authRoutes.onboarding,
+      const { error } = await authClient.resetPassword({
+        newPassword: formData.password,
+        token: token as string,
       });
       if (error) toast.error(error.message);
-      else toast.success("Magic link sent to email");
+      else toast.success("Password reset successfully");
+      router.push(appConfig.authRoutes.signin);
     } catch (error) {
-      toast.error("Error signing in");
+      toast.error("Error resetting password");
     } finally {
       form.reset();
     }
@@ -51,12 +65,12 @@ export function MagicLinkForm() {
         <div className="space-y-4">
           <FormField
             control={form.control}
-            name="email"
+            name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>New Password</FormLabel>
                 <FormControl>
-                  <Input {...field} type="email" placeholder="m@example.com" />
+                  <Input {...field} type="password" placeholder="********" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -67,7 +81,7 @@ export function MagicLinkForm() {
             className="w-full"
             loading={form.formState.isSubmitting}
           >
-            Send Magic Link
+            Reset password
           </Button>
         </div>
       </form>

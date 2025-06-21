@@ -13,33 +13,45 @@ import { Input } from "@/components/ui/input";
 import { appConfig } from "@/constants/config";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "nextjs-toploader/app";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-const magicLinkUserSchema = z.object({
+export type EmailOtpType = "sign-in" | "email-verification" | "forget-password";
+
+const emailOtpUserSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
 });
 
-type MagicLinkUser = z.infer<typeof magicLinkUserSchema>;
+type EmailOtpUser = z.infer<typeof emailOtpUserSchema>;
 
-export function MagicLinkForm() {
-  const form = useForm<MagicLinkUser>({
-    resolver: zodResolver(magicLinkUserSchema),
+export function EmailOtpForm({ type }: { type: EmailOtpType }) {
+  const router = useRouter();
+  const form = useForm<EmailOtpUser>({
+    resolver: zodResolver(emailOtpUserSchema),
     defaultValues: { email: "" },
     mode: "onChange",
   });
 
-  const onSubmit = async (formData: MagicLinkUser) => {
+  const onSubmit = async (formData: EmailOtpUser) => {
     try {
-      const { error } = await authClient.signIn.magicLink({
-        email: formData.email,
-        callbackURL: appConfig.authRoutes.onboarding,
-      });
-      if (error) toast.error(error.message);
-      else toast.success("Magic link sent to email");
+      await authClient.emailOtp.sendVerificationOtp(
+        { email: formData.email, type },
+        {
+          onError() {
+            toast.error("Error sending OTP");
+          },
+          onSuccess() {
+            router.push(
+              `${appConfig.authRoutes.verifyOtp}?email=${encodeURIComponent(formData.email)}&type=${type}`
+            );
+            toast.success("OTP sent to email");
+          },
+        }
+      );
     } catch (error) {
-      toast.error("Error signing in");
+      toast.error("Error sending OTP");
     } finally {
       form.reset();
     }
@@ -67,7 +79,7 @@ export function MagicLinkForm() {
             className="w-full"
             loading={form.formState.isSubmitting}
           >
-            Send Magic Link
+            Send OTP
           </Button>
         </div>
       </form>
