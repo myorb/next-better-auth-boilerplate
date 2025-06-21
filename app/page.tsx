@@ -45,7 +45,7 @@ export default function Home() {
             )}
             href={appConfig.authRoutes.signin}
           >
-            Get Started
+            Get Started.
           </Link>
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
