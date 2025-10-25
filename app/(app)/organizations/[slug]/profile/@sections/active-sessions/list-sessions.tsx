@@ -1,6 +1,9 @@
 "use client";
 
-import { onRevokeOtherSessions, onRevokeSession } from "@/actions/sessions";
+import {
+  revokeOtherSessionsAction,
+  revokeSessionAction,
+} from "@/actions/sessions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,11 +15,11 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { appConfig } from "@/constants/config";
-import { useServerAction } from "@/hooks/use-server-action";
 import { authClient } from "@/lib/auth-client";
 import { parseUserAgent } from "@/lib/utils";
 import { Session } from "better-auth";
 import { Laptop } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
 
@@ -33,14 +36,9 @@ export default function ListSessions({
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     null
   );
-  const { execute, isLoading } = useServerAction({
-    action: onRevokeSession,
-  });
+  const revokeSession = useAction(revokeSessionAction);
 
-  const { execute: revokeOtherSessions, isLoading: isRevokingOtherSessions } =
-    useServerAction({
-      action: onRevokeOtherSessions,
-    });
+  const revokeOtherSessions = useAction(revokeOtherSessionsAction);
 
   return (
     <Card className="bg-card text-card-foreground rounded-2xl border shadow-sm">
@@ -81,11 +79,15 @@ export default function ListSessions({
                       },
                     });
                   } else {
-                    execute({ token: session.token });
+                    revokeSession.executeAsync({ token: session.token });
                   }
                 }}
-                loading={isLoading && selectedSessionId === session.id}
-                disabled={isLoading && selectedSessionId === session.id}
+                loading={
+                  revokeSession.isExecuting && selectedSessionId === session.id
+                }
+                disabled={
+                  revokeSession.isExecuting && selectedSessionId === session.id
+                }
               >
                 {isCurrent ? "Sign Out" : "Revoke"}
               </Button>
@@ -101,9 +103,9 @@ export default function ListSessions({
         <Button
           type="submit"
           size="sm"
-          loading={isRevokingOtherSessions}
-          disabled={isRevokingOtherSessions || sessions.length <= 1}
-          onClick={() => revokeOtherSessions({})}
+          loading={revokeOtherSessions.isExecuting}
+          disabled={revokeOtherSessions.isExecuting || sessions.length <= 1}
+          onClick={() => revokeOtherSessions.executeAsync({})}
         >
           Revoke Other Sessions
         </Button>

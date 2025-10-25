@@ -11,7 +11,7 @@ export default async function Security() {
   });
 
   const isCredentialProvider = accounts.some(
-    (account) => account.provider === "credential"
+    (account) => account.providerId === "credential"
   );
 
   const passkeys = await auth.api.listPasskeys({

@@ -1,21 +1,20 @@
 "use server";
 
 import { appConfig } from "@/constants/config";
-import { validatedActionWithUser } from "@/lib/action-validation";
 import { auth } from "@/lib/auth";
-import { errorResponse, successResponse } from "@/lib/server-action-response";
+import { authActionClient } from "@/lib/safe-action";
 import { revokeSessionSchema } from "@/types/session.schema";
-import { APIError } from "better-auth/api";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 
-export const onRevokeSession = validatedActionWithUser(
-  revokeSessionSchema,
-  async (data, user) => {
+export const revokeSessionAction = authActionClient
+  .inputSchema(revokeSessionSchema)
+  .action(async ({ parsedInput }) => {
+    const { token } = parsedInput;
     try {
       await auth.api.revokeSession({
-        body: { token: data.token },
+        body: { token },
         headers: await headers(),
       });
 
@@ -23,20 +22,16 @@ export const onRevokeSession = validatedActionWithUser(
         `${appConfig.authRoutes.default}/[slug]/profile/active-sessions`,
         "page"
       );
-      return successResponse("Session revoked successfully");
+      return { success: true, message: "Session revoked successfully" };
     } catch (error) {
       console.error(error);
-      if (error instanceof APIError) {
-        return errorResponse(error.body?.message ?? "Failed to revoke session");
-      }
-      return errorResponse("Something went wrong. Please try again.");
+      throw error;
     }
-  }
-);
+  });
 
-export const onRevokeOtherSessions = validatedActionWithUser(
-  z.object({}),
-  async (data, user) => {
+export const revokeOtherSessionsAction = authActionClient
+  .inputSchema(z.object({}))
+  .action(async () => {
     try {
       await auth.api.revokeOtherSessions({
         headers: await headers(),
@@ -46,15 +41,9 @@ export const onRevokeOtherSessions = validatedActionWithUser(
         `${appConfig.authRoutes.default}/[slug]/profile/active-sessions`,
         "page"
       );
-      return successResponse("All sessions revoked successfully");
+      return { success: true, message: "All sessions revoked successfully" };
     } catch (error) {
       console.error(error);
-      if (error instanceof APIError) {
-        return errorResponse(
-          error.body?.message ?? "Failed to revoke all sessions"
-        );
-      }
-      return errorResponse("Something went wrong. Please try again.");
+      throw error;
     }
-  }
-);
+  });

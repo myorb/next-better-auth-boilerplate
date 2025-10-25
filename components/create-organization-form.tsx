@@ -1,6 +1,9 @@
 "use client";
 
-import { createOrganization } from "@/actions/organizations";
+import {
+  createOrganizationAction,
+  setActiveOrganizationAction,
+} from "@/actions/organizations";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,32 +15,25 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { InputWithAdornment } from "@/components/ui/input-with-adornment";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group";
 import { OrganizationAvatar } from "@/components/ui/organization-avatar";
+import { Spinner } from "@/components/ui/spinner";
 import { TextEllipsis } from "@/components/ui/text-ellipsis";
 import { authClient } from "@/lib/auth-client";
-import { getErrorMessage } from "@/lib/utils";
+import { createOrganizationSchema } from "@/types/organization.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
+import { IconCheck, IconX } from "@tabler/icons-react";
 import { generateId } from "better-auth";
-import { APIError } from "better-auth/api";
 import { Organization } from "better-auth/plugins";
-import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
-
-const createOrganizationSchema = z.object({
-  name: z.string().min(1, { message: "Name is required" }),
-  slug: z
-    .string()
-    .min(1, { message: "Slug is required" })
-    .regex(/^[a-z0-9-]+$/, {
-      message: "Slug must contain only lowercase letters, numbers, and hyphens",
-    }),
-});
-
-type CreateOrganization = z.infer<typeof createOrganizationSchema>;
 
 type CreateOrganizationFormProps = {
   onSuccess: (organization: Organization) => void;
@@ -47,21 +43,53 @@ export function CreateOrganizationForm({
   onSuccess,
 }: CreateOrganizationFormProps) {
   const [isValidatingSlug, setIsValidatingSlug] = useState(false);
-  const [isCreatingOrganization, setIsCreatingOrganization] = useState(false);
+  const [isSlugError, setIsSlugError] = useState(false);
   const [slugToCheck, setSlugToCheck] = useState("");
-  const form = useForm<CreateOrganization>({
-    resolver: zodResolver(createOrganizationSchema),
-    defaultValues: { name: "", slug: "" },
-    mode: "onChange",
-  });
+
+  const setActiveOrganization = useAction(setActiveOrganizationAction);
+
+  const { form, action, handleSubmitWithAction, resetFormAndAction } =
+    useHookFormAction(
+      createOrganizationAction,
+      zodResolver(createOrganizationSchema),
+      {
+        formProps: {
+          mode: "onChange",
+          defaultValues: { name: "", slug: "" },
+        },
+        actionProps: {
+          onSuccess: async (args) => {
+            resetFormAndAction();
+            if (args.data?.data) {
+              const organization = args.data.data;
+              await setActiveOrganization.executeAsync({
+                slug: organization.slug,
+                id: organization.id,
+              });
+              onSuccess?.(organization);
+            }
+            toast.success("Organization created successfully");
+          },
+          onError: (error) => {
+            toast.error(error.error.serverError);
+          },
+        },
+      }
+    );
 
   const handleSlugCheck = useCallback(
     async (slug: string) => {
       try {
         setIsValidatingSlug(true);
         const { error } = await authClient.organization.checkSlug({ slug });
-        if (error) form.setError("slug", { message: "Slug is already taken" });
+        if (error) {
+          setIsSlugError(true);
+          form.setError("slug", { message: "Slug is already taken" });
+        } else {
+          setIsSlugError(false);
+        }
       } catch (error) {
+        setIsSlugError(true);
         form.setError("slug", { message: "Error checking slug" });
       } finally {
         setIsValidatingSlug(false);
@@ -92,34 +120,9 @@ export function CreateOrganizationForm({
     form.setValue("slug", slug);
   }, [watchName, form]);
 
-  const onSubmit = async (data: CreateOrganization) => {
-    try {
-      setIsCreatingOrganization(true);
-      const { data: organization, error } = await createOrganization({
-        name: data.name,
-        slug: data.slug,
-      });
-
-      if (error) toast.error(getErrorMessage(error));
-      if (organization) {
-        await authClient.organization.setActive({
-          organizationId: organization.id,
-        });
-        onSuccess?.(organization);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error(
-        error instanceof APIError ? error.body?.message : "An error occurred"
-      );
-    } finally {
-      setIsCreatingOrganization(false);
-    }
-  };
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmitWithAction}>
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <OrganizationAvatar
@@ -157,20 +160,32 @@ export function CreateOrganizationForm({
               <FormItem>
                 <FormLabel>Slug</FormLabel>
                 <FormControl>
-                  <InputWithAdornment
-                    {...field}
-                    startAdornment="/organizations/"
-                    endAdornment={
-                      isValidatingSlug && (
-                        <Loader2 className="size-4 animate-spin" />
-                      )
-                    }
-                    placeholder="acme-inc"
-                    onChange={(e) => {
-                      field.onChange(e);
-                      setSlugToCheck(e.target.value);
-                    }}
-                  />
+                  <InputGroup>
+                    <InputGroupInput
+                      {...field}
+                      placeholder="acme-inc"
+                      onChange={(e) => {
+                        field.onChange(e);
+                        setSlugToCheck(e.target.value);
+                      }}
+                    />
+                    <InputGroupAddon>
+                      <InputGroupText>/organizations/</InputGroupText>
+                    </InputGroupAddon>
+                    <InputGroupAddon align="inline-end">
+                      {isValidatingSlug ? (
+                        <Spinner />
+                      ) : isSlugError ? (
+                        <div className="bg-destructive text-white flex size-4 items-center justify-center rounded-full">
+                          <IconX className="size-3" />
+                        </div>
+                      ) : (
+                        <div className="bg-primary text-primary-foreground flex size-4 items-center justify-center rounded-full">
+                          <IconCheck className="size-3" />
+                        </div>
+                      )}
+                    </InputGroupAddon>
+                  </InputGroup>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -180,11 +195,9 @@ export function CreateOrganizationForm({
             type="submit"
             className="w-full"
             disabled={
-              isCreatingOrganization ||
-              !form.formState.isValid ||
-              isValidatingSlug
+              action.isExecuting || !form.formState.isValid || isValidatingSlug
             }
-            loading={isCreatingOrganization}
+            loading={action.isExecuting}
           >
             Create Organization
           </Button>

@@ -1,5 +1,6 @@
 import {
   apiKeyClient,
+  customSessionClient,
   emailOTPClient,
   magicLinkClient,
   organizationClient,
@@ -17,5 +18,6 @@ export const authClient = createAuthClient({
     organizationClient(),
     apiKeyClient(),
     passkeyClient(),
+    customSessionClient(),
   ],
 });

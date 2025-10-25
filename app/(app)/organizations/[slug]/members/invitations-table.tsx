@@ -14,9 +14,10 @@ import { TextEllipsis } from "@/components/ui/text-ellipsis";
 import { Invitation } from "better-auth/plugins";
 import { format } from "date-fns";
 import { InvitationActions } from "./invitation-actions";
+import { InvitationInfer, InvitationWithOrganization } from "@/types/organizations";
 
 interface InvitationsTableProps {
-  invitations: Invitation[];
+  invitations: InvitationInfer[];
 }
 
 export function InvitationsTable({ invitations }: InvitationsTableProps) {
@@ -80,6 +81,7 @@ export function InvitationsTable({ invitations }: InvitationsTableProps) {
                   <InvitationActions
                     invitationId={invitation.id}
                     email={invitation.email}
+                    role={invitation.role}
                   />
                 </TableCell>
               </TableRow>

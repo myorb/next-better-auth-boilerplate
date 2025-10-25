@@ -1,283 +1,228 @@
 "use server";
 
 import { appConfig } from "@/constants/config";
-import {
-  validatedAction,
-  validatedActionWithUser,
-} from "@/lib/action-validation";
 import { auth } from "@/lib/auth";
-import { errorResponse, successResponse } from "@/lib/server-action-response";
+import { authActionClient } from "@/lib/safe-action";
+import { db } from "@/server";
+import { members, sessions } from "@/server/schema";
 import {
   acceptInvitationSchema,
   cancelInvitationSchema,
-  CreateOrganization,
+  createOrganizationSchema,
   declineInvitationSchema,
   inviteMemberSchema,
   resendInvitationSchema,
+  setActiveOrganizationSchema,
   updateMemberSchema,
-  UpdateOrganization,
+  updateOrganizationNameSchema,
+  updateOrganizationSlugSchema,
 } from "@/types/organization.schema";
-import { InvitationWithOrganization } from "@/types/organizations";
-import { APIError } from "better-auth/api";
-import { Organization } from "better-auth/plugins/organization";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { redirect, RedirectType } from "next/navigation";
 
-export async function createOrganization(
-  organization: CreateOrganization
-): Promise<{
-  success: boolean;
-  error?: string | null;
-  data?: Organization | null;
-}> {
-  try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!session) return { success: false, error: "Unauthorized" };
-
-    const { name, slug } = organization;
-
-    const createdOrganization = await auth.api.createOrganization({
-      body: { name, slug },
-      headers: await headers(),
-    });
-
-    revalidatePath(appConfig.authRoutes.default);
-    return {
-      success: true,
-      error: null,
-      data: createdOrganization,
-    };
-  } catch (error) {
-    console.error(error);
-    if (error instanceof APIError) {
-      return { success: false, error: error.body?.message };
-    }
-    return { success: false, error: "Something went wrong. Please try again." };
-  }
-}
-
-export async function updateOrganization(
-  organization: UpdateOrganization
-): Promise<{
-  success: boolean;
-  error?: string | null;
-  data?: Organization | null;
-}> {
-  try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!session) return { success: false, error: "Unauthorized" };
-
-    const { name, slug } = organization;
-
-    const updatedOrganization = await auth.api.updateOrganization({
-      body: { data: { name, slug } },
-      headers: await headers(),
-    });
-
-    revalidatePath(appConfig.authRoutes.default);
-    return {
-      success: true,
-      error: null,
-      data: updatedOrganization,
-    };
-  } catch (error) {
-    console.error(error);
-    if (error instanceof APIError) {
-      return { success: false, error: error.body?.message };
-    }
-    return { success: false, error: "Something went wrong. Please try again." };
-  }
-}
-
-export async function setActiveOrganization(slug: string) {
-  try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!session) return { success: false, error: "Unauthorized" };
-
-    const activeOrganization = await auth.api.setActiveOrganization({
-      body: { organizationSlug: slug },
-      headers: await headers(),
-    });
-
-    revalidatePath(appConfig.authRoutes.default);
-    return { success: true, error: null, data: activeOrganization };
-  } catch (error) {
-    console.error(error);
-    if (error instanceof APIError) {
-      return { success: false, error: error.body?.message };
-    }
-    return { success: false, error: "Something went wrong. Please try again." };
-  }
-}
-
-export const getInvitation = async (
-  id: string
-): Promise<{
-  success: boolean;
-  error?: string | null;
-  data?: InvitationWithOrganization | null;
-}> => {
-  try {
-    const invitation = (await auth.api.getInvitation({
-      query: { id },
-      headers: await headers(),
-    })) as InvitationWithOrganization;
-
-    return { success: true, error: null, data: invitation };
-  } catch (error) {
-    console.error(error);
-    if (error instanceof APIError) {
-      return { success: false, error: error.body?.message };
-    }
-    return { success: false, error: "Something went wrong. Please try again." };
-  }
-};
-
-export const onInviteMember = validatedActionWithUser(
-  inviteMemberSchema,
-  async (data, user) => {
+export const createOrganizationAction = authActionClient
+  .inputSchema(createOrganizationSchema)
+  .action(async ({ parsedInput }) => {
+    const { name, slug } = parsedInput;
     try {
-      const { email, role } = data;
+      const createdOrganization = await auth.api.createOrganization({
+        body: { name, slug },
+        headers: await headers(),
+      });
 
+      revalidatePath(appConfig.authRoutes.default);
+      return {
+        success: true,
+        message: "Organization created successfully",
+        data: createdOrganization,
+      };
+    } catch (error) {
+      throw error;
+    }
+  });
+
+export const updateOrganizationNameAction = authActionClient
+  .inputSchema(updateOrganizationNameSchema)
+  .action(async ({ parsedInput }) => {
+    const { name } = parsedInput;
+    try {
+      const updatedOrganization = await auth.api.updateOrganization({
+        body: { data: { name } },
+        headers: await headers(),
+      });
+
+      revalidatePath(appConfig.authRoutes.default);
+      return {
+        success: true,
+        message: "Organization name updated successfully",
+        data: updatedOrganization,
+      };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  });
+
+export const updateOrganizationSlugAction = authActionClient
+  .inputSchema(updateOrganizationSlugSchema)
+  .action(async ({ parsedInput }) => {
+    const { slug } = parsedInput;
+    try {
+      await auth.api.updateOrganization({
+        body: { data: { slug } },
+        headers: await headers(),
+      });
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+    redirect(
+      `${appConfig.authRoutes.default}/${slug}/settings`,
+      RedirectType.replace
+    );
+  });
+
+export const setActiveOrganizationAction = authActionClient
+  .inputSchema(setActiveOrganizationSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const { slug, id } = parsedInput;
+    try {
+      const activeOrganization = await auth.api.setActiveOrganization({
+        body: { organizationSlug: slug, organizationId: id },
+        headers: await headers(),
+      });
+
+      // update session table with active organization id
+      await db
+        .update(sessions)
+        .set({ activeOrganizationId: id })
+        .where(eq(sessions.id, ctx.sessionId));
+
+      revalidatePath(appConfig.authRoutes.default, "page");
+      return {
+        success: true,
+        message: "Organization set as active successfully",
+        data: activeOrganization,
+      };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  });
+
+export const inviteMemberAction = authActionClient
+  .inputSchema(inviteMemberSchema)
+  .action(async ({ parsedInput }) => {
+    const { email, role } = parsedInput;
+    try {
       await auth.api.createInvitation({
         body: { email, role },
         headers: await headers(),
       });
 
       revalidatePath("/members");
-      return successResponse("Invitation sent successfully");
+      return { success: true, message: "Invitation sent successfully" };
     } catch (error) {
       console.error("Error inviting member:", error);
-      if (error instanceof APIError) {
-        return errorResponse(
-          error.body?.message ?? "Failed to send invitation"
-        );
-      }
-      return errorResponse("Failed to send invitation");
+      throw error;
     }
-  }
-);
+  });
 
-export const onUpdateMember = validatedActionWithUser(
-  updateMemberSchema,
-  async (data, user) => {
+export const updateMemberAction = authActionClient
+  .inputSchema(updateMemberSchema)
+  .action(async ({ parsedInput }) => {
+    const { id, role } = parsedInput;
     try {
       await auth.api.updateMemberRole({
-        body: { memberId: data.id, role: data.role },
+        body: { memberId: id, role },
         headers: await headers(),
       });
-
-      revalidatePath("/members");
-      return successResponse("Member updated successfully");
     } catch (error) {
       console.error("Error updating member:", error);
-      if (error instanceof APIError) {
-        return errorResponse(error.body?.message ?? "Failed to update member");
-      }
-      return errorResponse("Failed to update member");
+      throw error;
     }
-  }
-);
+    revalidatePath("/members");
+  });
 
-export const onCancelInvitation = validatedActionWithUser(
-  cancelInvitationSchema,
-  async (data, user) => {
+export const cancelInvitationAction = authActionClient
+  .inputSchema(cancelInvitationSchema)
+  .action(async ({ parsedInput }) => {
+    const { invitationId } = parsedInput;
     try {
       await auth.api.cancelInvitation({
-        body: { invitationId: data.invitationId },
+        body: { invitationId },
         headers: await headers(),
       });
-
-      revalidatePath("/members");
-      return successResponse("Invitation canceled successfully");
+      revalidatePath(`${appConfig.authRoutes.default}/[slug]/members`, "page");
+      return { success: true, message: "Invitation canceled successfully" };
     } catch (error) {
       console.error("Error canceling invitation:", error);
-      if (error instanceof APIError) {
-        return errorResponse(
-          error.body?.message ?? "Failed to cancel invitation"
-        );
-      }
-      return errorResponse("Failed to cancel invitation");
+      throw error;
     }
-  }
-);
+  });
 
-export const onResendInvitation = validatedActionWithUser(
-  resendInvitationSchema,
-  async (data, user) => {
+export const resendInvitationAction = authActionClient
+  .inputSchema(resendInvitationSchema)
+  .action(async ({ parsedInput }) => {
+    const { email, role } = parsedInput;
     try {
       await auth.api.createInvitation({
-        body: { email: data.email, role: data.role, resend: true },
+        body: { email, role, resend: true },
         headers: await headers(),
       });
-
-      revalidatePath("/members");
-      return successResponse("Invitation resent successfully");
+      revalidatePath(`${appConfig.authRoutes.default}/[slug]/members`, "page");
+      return { success: true, message: "Invitation resent successfully" };
     } catch (error) {
       console.error("Error resending invitation:", error);
-      if (error instanceof APIError) {
-        return errorResponse(
-          error.body?.message ?? "Failed to resend invitation"
-        );
-      }
-      return errorResponse("Failed to resend invitation");
+      throw error;
     }
-  }
-);
+  });
 
-export const onAcceptInvitation = validatedAction(
-  acceptInvitationSchema,
-  async (data) => {
+export const acceptInvitationAction = authActionClient
+  .inputSchema(acceptInvitationSchema)
+  .action(async ({ parsedInput }) => {
+    const { invitationId, revalidatePath: revalidatePathValue } = parsedInput;
     try {
       await auth.api.acceptInvitation({
-        body: { invitationId: data.invitationId },
+        body: { invitationId },
         headers: await headers(),
       });
 
-      // Redirect to dashboard
-      // revalidatePath(data.revalidatePath ?? "/onboarding");
-      revalidatePath(data.revalidatePath ?? appConfig.authRoutes.default);
-      return successResponse("Invitation accepted successfully");
+      revalidatePath(revalidatePathValue || appConfig.authRoutes.default);
+      return { success: true, message: "Invitation accepted successfully" };
     } catch (error) {
       console.error("Error accepting invitation:", error);
-      if (error instanceof APIError) {
-        return errorResponse(
-          error.body?.message ?? "Failed to accept invitation"
-        );
-      }
-      return errorResponse("Failed to accept invitation");
+      throw error;
     }
-  }
-);
+  });
 
-export const onDeclineInvitation = validatedAction(
-  declineInvitationSchema,
-  async (data) => {
+export const declineInvitationAction = authActionClient
+  .inputSchema(declineInvitationSchema)
+  .action(async ({ parsedInput }) => {
+    const { invitationId, revalidatePath: revalidatePathValue } = parsedInput;
     try {
       await auth.api.rejectInvitation({
-        body: { invitationId: data.invitationId },
+        body: { invitationId },
         headers: await headers(),
       });
-
-      revalidatePath(data.revalidatePath ?? appConfig.authRoutes.default);
-      return successResponse("Invitation declined successfully");
+      revalidatePath(revalidatePathValue || appConfig.authRoutes.default);
+      return { success: true, message: "Invitation declined successfully" };
     } catch (error) {
       console.error("Error declining invitation:", error);
-      if (error instanceof APIError) {
-        return errorResponse(
-          error.body?.message ?? "Failed to decline invitation"
-        );
-      }
-      return errorResponse("Failed to decline invitation");
+      throw error;
     }
-  }
-);
+  });
+
+export async function getUserDefaultOrganizationId(
+  userId: string
+): Promise<string | null> {
+  const organizationsData = await db
+    .select()
+    .from(members)
+    .where(eq(members.userId, userId))
+    .limit(1);
+  console.log(organizationsData);
+  return organizationsData?.[0]?.organizationId ?? null;
+}

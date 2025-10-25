@@ -1,6 +1,6 @@
 "use client";
 
-import { onInviteMember } from "@/actions/organizations";
+import { inviteMemberAction } from "@/actions/organizations";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,42 +26,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useServerAction } from "@/hooks/use-server-action";
-import { InviteMember, inviteMemberSchema } from "@/types/organization.schema";
+import { inviteMemberSchema } from "@/types/organization.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { UserPlus } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export function InviteMemberDialog() {
   const [open, setOpen] = useState(false);
-  const form = useForm<InviteMember>({
-    resolver: zodResolver(inviteMemberSchema),
-    defaultValues: {
-      email: "",
-      role: "member",
-    },
-  });
-
-  const { execute, isLoading } = useServerAction({
-    action: onInviteMember,
-    message: {
-      success: "Member invited successfully",
-      loading: "Inviting member...",
-    },
-    onSuccess: () => {
-      form.reset();
-      setOpen(false);
-    },
-    onError: () => {
-      form.reset();
-      setOpen(false);
-    },
-  });
-
-  const onSubmit = async (data: InviteMember) => {
-    await execute(data);
-  };
+  const { form, action, handleSubmitWithAction, resetFormAndAction } =
+    useHookFormAction(inviteMemberAction, zodResolver(inviteMemberSchema), {
+      formProps: {
+        mode: "onChange",
+        defaultValues: {
+          email: "",
+          role: "member",
+        },
+      },
+      actionProps: {
+        onSuccess: () => {
+          resetFormAndAction();
+          setOpen(false);
+          toast.success("Invitation sent successfully");
+        },
+        onError: (error) => {
+          toast.error(error.error.serverError ?? "Something went wrong");
+        },
+      },
+    });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -79,7 +72,7 @@ export function InviteMemberDialog() {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmitWithAction} className="space-y-4">
             <FormField
               control={form.control}
               name="email"
@@ -122,7 +115,11 @@ export function InviteMemberDialog() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" loading={isLoading}>
+            <Button
+              type="submit"
+              className="w-full"
+              loading={action.isExecuting}
+            >
               Send Invitation
             </Button>
           </form>

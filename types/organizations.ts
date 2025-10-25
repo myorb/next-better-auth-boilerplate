@@ -15,4 +15,5 @@ export type InvitationWithOrganization = InvitationInfer & {
   organizationSlug: string;
 };
 
+export type OrganizationMemberRole = "member" | "admin" | "owner";
 export type ProviderType = "github" | "google" | "facebook" | "apple";

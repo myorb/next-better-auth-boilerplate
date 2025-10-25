@@ -1,6 +1,6 @@
 "use client";
 
-import { onUpdateMember } from "@/actions/organizations";
+import { updateMemberAction } from "@/actions/organizations";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,12 +24,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useServerAction } from "@/hooks/use-server-action";
 import { authClient } from "@/lib/auth-client";
-import { UpdateMember, updateMemberSchema } from "@/types/organization.schema";
+import { updateMemberSchema } from "@/types/organization.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 type Member = typeof authClient.$Infer.Member;
 
@@ -44,30 +44,34 @@ export function UpdateMemberRoleDialog({
   open,
   setOpen,
 }: UpdateMemberRoleDialogProps) {
-  const { execute, isLoading } = useServerAction({
-    action: onUpdateMember,
-    message: {
-      success: "Member updated successfully",
-      loading: "Updating member...",
-    },
-  });
-  const form = useForm<UpdateMember>({
-    resolver: zodResolver(updateMemberSchema),
-    mode: "onChange",
-  });
+  // const { data: activeOrganization } = authClient.useActiveOrganization();
 
-  const onSubmit = async (data: UpdateMember) => {
-    const response = await execute(data);
-    if (response.success) {
-      setOpen(false);
-    }
-  };
+  const { form, action, handleSubmitWithAction, resetFormAndAction } =
+    useHookFormAction(updateMemberAction, zodResolver(updateMemberSchema), {
+      formProps: {
+        mode: "onChange",
+        defaultValues: {
+          id: member?.id,
+          role: member?.role ?? "member",
+        },
+      },
+      actionProps: {
+        onSuccess: () => {
+          resetFormAndAction();
+          setOpen(false);
+          toast.success("Member role updated successfully");
+        },
+        onError: (error) => {
+          toast.error(error.error.serverError ?? "Something went wrong");
+        },
+      },
+    });
 
   useEffect(() => {
     if (member) {
       form.reset({
         id: member.id,
-        role: member.role ?? "member",
+        role: member.role,
       });
     }
   }, [member, form]);
@@ -82,7 +86,7 @@ export function UpdateMemberRoleDialog({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmitWithAction} className="space-y-4">
             <FormField
               control={form.control}
               name="role"
@@ -108,7 +112,11 @@ export function UpdateMemberRoleDialog({
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" loading={isLoading}>
+            <Button
+              type="submit"
+              className="w-full"
+              loading={action.isExecuting}
+            >
               Update Role
             </Button>
           </form>

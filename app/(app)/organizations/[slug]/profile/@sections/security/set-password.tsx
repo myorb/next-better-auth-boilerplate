@@ -1,6 +1,6 @@
 "use client";
 
-import { onSetPassword } from "@/actions/users";
+import { setPasswordAction } from "@/actions/users";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,33 +19,33 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useServerAction } from "@/hooks/use-server-action";
-import { SetPasswordForm, setPasswordSchema } from "@/types/user.schema";
+import { setPasswordSchema } from "@/types/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { toast } from "sonner";
 
 export default function SetPassword() {
-  const { execute, isLoading } = useServerAction({
-    action: onSetPassword,
-    onSuccess: () => toast.success("Password updated successfully"),
-    onError: () => toast.error("Failed to update password"),
-  });
-
-  const form = useForm<SetPasswordForm>({
-    resolver: zodResolver(setPasswordSchema),
-    defaultValues: { password: "" },
-    mode: "onChange",
-  });
-
-  const onSubmit = async (data: SetPasswordForm) => {
-    await execute(data);
-  };
+  const { form, action, handleSubmitWithAction, resetFormAndAction } =
+    useHookFormAction(setPasswordAction, zodResolver(setPasswordSchema), {
+      formProps: {
+        mode: "onChange",
+        defaultValues: { password: "" },
+      },
+      actionProps: {
+        onSuccess: () => {
+          resetFormAndAction();
+          toast.success("Password updated successfully");
+        },
+        onError: (error) => {
+          toast.error(error.error.serverError);
+        },
+      },
+    });
 
   return (
     <div className="flex flex-col gap-4 h-full">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmitWithAction} className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Set Password</CardTitle>
@@ -78,8 +78,8 @@ export default function SetPassword() {
               <Button
                 type="submit"
                 size="sm"
-                loading={isLoading}
-                disabled={isLoading}
+                loading={action.isExecuting}
+                disabled={action.isExecuting}
               >
                 Save
               </Button>

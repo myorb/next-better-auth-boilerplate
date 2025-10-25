@@ -1,97 +1,72 @@
 "use server";
 
-import { appConfig } from "@/constants/config";
-import { validatedActionWithUser } from "@/lib/action-validation";
 import { auth } from "@/lib/auth";
-import { errorResponse, successResponse } from "@/lib/server-action-response";
+import { authActionClient } from "@/lib/safe-action";
 import {
   changePasswordSchema,
+  deleteUserSchema,
   setPasswordSchema,
   updateUserNameSchema,
 } from "@/types/user.schema";
-import { APIError } from "better-auth/api";
-import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
-export const onUpdateUserName = validatedActionWithUser(
-  updateUserNameSchema,
-  async (data, user) => {
+export const updateUserNameAction = authActionClient
+  .inputSchema(updateUserNameSchema)
+  .action(async ({ parsedInput }) => {
+    const { name } = parsedInput;
     try {
       await auth.api.updateUser({
-        body: { name: data.name },
+        body: { name },
         headers: await headers(),
       });
-
-      revalidatePath(
-        `${appConfig.authRoutes.default}/[slug]/profile/personal-details`,
-        "page"
-      );
-      return successResponse("Profile details updated successfully");
+      return { success: true, message: "Profile details updated successfully" };
     } catch (error) {
-      console.error(error);
-      if (error instanceof APIError) {
-        return errorResponse(
-          error.body?.message ?? "Failed to update profile details"
-        );
-      }
-      return errorResponse("Something went wrong. Please try again.");
+      throw error;
     }
-  }
-);
+  });
 
-export const onSetPassword = validatedActionWithUser(
-  setPasswordSchema,
-  async (data, user) => {
+export const setPasswordAction = authActionClient
+  .inputSchema(setPasswordSchema)
+  .action(async ({ parsedInput }) => {
+    const { password } = parsedInput;
     try {
       await auth.api.setPassword({
-        body: { newPassword: data.password },
+        body: { newPassword: password },
         headers: await headers(),
       });
-
-      revalidatePath(
-        `${appConfig.authRoutes.default}/[slug]/profile/security`,
-        "page"
-      );
-      return successResponse("Password updated successfully");
+      return { success: true, message: "Password updated successfully" };
     } catch (error) {
-      console.error(error);
-      if (error instanceof APIError) {
-        return errorResponse(
-          error.body?.message ?? "Failed to update password"
-        );
-      }
-      return errorResponse("Something went wrong. Please try again.");
+      throw error;
     }
-  }
-);
+  });
 
-export const onChangePassword = validatedActionWithUser(
-  changePasswordSchema,
-  async (data, user) => {
+export const changePasswordAction = authActionClient
+  .inputSchema(changePasswordSchema)
+  .action(async ({ parsedInput }) => {
+    const { newPassword, currentPassword } = parsedInput;
     try {
-      // Check if the current password is correct
       await auth.api.changePassword({
-        body: {
-          newPassword: data.newPassword,
-          currentPassword: data.currentPassword,
-          revokeOtherSessions: true,
-        },
+        body: { newPassword, currentPassword, revokeOtherSessions: true },
         headers: await headers(),
       });
+      return { success: true, message: "Password changed successfully" };
+    } catch (error) {
+      throw error;
+    }
+  });
 
-      revalidatePath(
-        `${appConfig.authRoutes.default}/[slug]/profile/security`,
-        "page"
-      );
-      return successResponse("Password changed successfully");
+export const deleteUserAction = authActionClient
+  .inputSchema(deleteUserSchema)
+  .action(async ({ parsedInput }) => {
+    const { password } = parsedInput;
+    try {
+      await auth.api.deleteUser({
+        body: { password },
+        headers: await headers(),
+      });
+      return { success: true, message: "Account deleted successfully" };
     } catch (error) {
       console.error(error);
-      if (error instanceof APIError) {
-        return errorResponse(
-          error.body?.message ?? "Failed to change password"
-        );
-      }
-      return errorResponse("Something went wrong. Please try again.");
+      throw error;
     }
-  }
-);
+  });

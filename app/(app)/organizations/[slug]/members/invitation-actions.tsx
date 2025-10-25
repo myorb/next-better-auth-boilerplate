@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  onCancelInvitation,
-  onResendInvitation,
+  cancelInvitationAction,
+  resendInvitationAction,
 } from "@/actions/organizations";
 import {
   AlertDialog,
@@ -16,45 +16,52 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useServerAction } from "@/hooks/use-server-action";
+import { OrganizationMemberRole } from "@/types/organizations";
 import { RefreshCw } from "lucide-react";
-import { z } from "zod";
+import { useAction } from "next-safe-action/hooks";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface InvitationActionsProps {
   invitationId: string;
   email: string;
+  role: OrganizationMemberRole;
 }
 
 export function InvitationActions({
   invitationId,
   email,
+  role,
 }: InvitationActionsProps) {
-  const { execute: cancelAction, isLoading: cancelPending } = useServerAction({
-    action: onCancelInvitation,
-    message: { loading: "Cancelling invitation..." },
+  const [open, setOpen] = useState(false);
+  const cancelAction = useAction(cancelInvitationAction, {
+    onSuccess: () => {
+      toast.success("Invitation canceled successfully");
+      setOpen(false);
+    },
+    onError: (error) => {
+      toast.error(error.error.serverError ?? "Something went wrong");
+    },
   });
-  const { execute: resendAction, isLoading: resendPending } = useServerAction({
-    action: onResendInvitation,
-    message: { loading: "Resending invitation..." },
+  const resendAction = useAction(resendInvitationAction, {
+    onSuccess: () => {
+      toast.success("Invitation resent successfully");
+      setOpen(false);
+    },
+    onError: (error) => {
+      toast.error(error.error.serverError ?? "Something went wrong");
+    },
   });
-
-  const handleResend = async (invitationId: string) => {
-    await resendAction({ invitationId });
-  };
-
-  const handleCancel = async (invitationId: string) => {
-    await cancelAction({ invitationId });
-  };
 
   return (
     <div className="flex items-center gap-2">
-      <AlertDialog>
+      <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogTrigger asChild>
           <Button
             variant="ghost"
             size="sm"
             className="text-muted-foreground hover:text-primary"
-            disabled={resendPending || cancelPending}
+            disabled={resendAction.isExecuting || cancelAction.isExecuting}
           >
             <RefreshCw className="h-4 w-4" />
           </Button>
@@ -67,12 +74,12 @@ export function InvitationActions({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={resendPending}>
+            <AlertDialogCancel disabled={resendAction.isExecuting}>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => handleResend(invitationId)}
-              disabled={resendPending}
+              onClick={() => resendAction.executeAsync({ email, role })}
+              disabled={resendAction.isExecuting}
             >
               Resend Invitation
             </AlertDialogAction>
@@ -80,13 +87,13 @@ export function InvitationActions({
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog>
+      <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogTrigger asChild>
           <Button
             variant="ghost"
             size="sm"
             className="text-muted-foreground hover:text-destructive"
-            disabled={cancelPending || resendPending}
+            disabled={cancelAction.isExecuting || resendAction.isExecuting}
           >
             Cancel
           </Button>
@@ -100,12 +107,12 @@ export function InvitationActions({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={cancelPending}>
+            <AlertDialogCancel disabled={cancelAction.isExecuting}>
               No, keep it
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => handleCancel(invitationId)}
-              disabled={cancelPending}
+              onClick={() => cancelAction.executeAsync({ invitationId })}
+              disabled={cancelAction.isExecuting}
             >
               Yes, cancel invitation
             </AlertDialogAction>

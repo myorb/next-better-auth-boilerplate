@@ -1,4 +1,6 @@
+import { getUserDefaultOrganizationId } from "@/actions/organizations";
 import { TwoFactorOtpEmail } from "@/emails/2fa-otp-verification";
+import { ChangeEmailVerificationEmail } from "@/emails/change-email-verification";
 import { VerificationEmail } from "@/emails/email-verification";
 import MagicLinkEmail from "@/emails/magic-link-login";
 import OrganizationInviteEmail from "@/emails/organization-invitation";
@@ -12,14 +14,14 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import {
   apiKey,
+  customSession,
   emailOTP,
   magicLink,
   organization,
   twoFactor,
 } from "better-auth/plugins";
-import { resend } from "./resend";
-import { ChangeEmailVerificationEmail } from "@/emails/change-email-verification";
 import { passkey } from "better-auth/plugins/passkey";
+import { resend } from "./resend";
 
 export const auth = betterAuth({
   appName: "Next Better Auth Neon Boilerplate",
@@ -173,7 +175,6 @@ export const auth = betterAuth({
         });
       },
     }),
-    nextCookies(),
     magicLink({
       sendMagicLink: async ({ email, url }) => {
         await resend.emails.send({
@@ -237,5 +238,28 @@ export const auth = betterAuth({
       rpName: "Next Better Auth Neon Boilerplate",
       origin: process.env.BETTER_AUTH_URL!,
     }),
+    nextCookies(),
+    customSession(async ({ user, session }) => {
+      // You can return a custom object, but just returning user and session is fine.
+      return { user, session };
+    }),
   ],
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          const organizationId = await getUserDefaultOrganizationId(
+            session.userId
+          );
+          console.log(organizationId);
+          return {
+            data: {
+              ...session,
+              activeOrganizationId: organizationId,
+            },
+          };
+        },
+      },
+    },
+  },
 });

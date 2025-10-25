@@ -1,4 +1,4 @@
-import { updateOrganization } from "@/actions/organizations";
+import { updateOrganizationNameAction } from "@/actions/organizations";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,42 +17,41 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { updateOrganizationSchema } from "@/types/organization.schema";
-import { UpdateOrganization } from "@/types/organization.schema";
+import { updateOrganizationNameSchema } from "@/types/organization.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { Organization } from "better-auth/plugins";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export function UpdateOrganizationName({
   organization,
 }: {
   organization: Organization;
 }) {
-  const [isUpdating, setIsUpdating] = useState(false);
-  const form = useForm<UpdateOrganization>({
-    resolver: zodResolver(updateOrganizationSchema),
-    defaultValues: { name: organization.name },
-    mode: "onChange",
-  });
-
-  const onSubmit = async (data: UpdateOrganization) => {
-    setIsUpdating(true);
-    try {
-      await updateOrganization({
-        name: data.name,
-        slug: organization.slug,
-      });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+  const { form, action, handleSubmitWithAction, resetFormAndAction } =
+    useHookFormAction(
+      updateOrganizationNameAction,
+      zodResolver(updateOrganizationNameSchema),
+      {
+        formProps: {
+          mode: "onChange",
+          defaultValues: { name: organization.name },
+        },
+        actionProps: {
+          onSuccess: () => {
+            resetFormAndAction();
+            toast.success("Organization name updated successfully");
+          },
+          onError: (error) => {
+            toast.error(error.error.serverError);
+          },
+        },
+      }
+    );
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmitWithAction} className="space-y-4">
         <Card>
           <CardHeader>
             <CardTitle>Organization Name</CardTitle>
@@ -77,7 +76,7 @@ export function UpdateOrganizationName({
             <p className="text-sm text-muted-foreground">
               This action will update the name of the organization.
             </p>
-            <Button type="submit" size="sm" loading={isUpdating}>
+            <Button type="submit" size="sm" loading={action.isExecuting}>
               Save
             </Button>
           </CardFooter>

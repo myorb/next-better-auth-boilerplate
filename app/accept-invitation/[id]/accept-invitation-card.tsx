@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  onAcceptInvitation,
-  onDeclineInvitation,
+  acceptInvitationAction,
+  declineInvitationAction,
 } from "@/actions/organizations";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,32 +13,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { appConfig } from "@/constants/config";
-import { useServerAction } from "@/hooks/use-server-action";
 import { InvitationWithOrganization } from "@/types/organizations";
 import { IconFlowerFilled } from "@tabler/icons-react";
-import { useRouter } from "nextjs-toploader/app";
+import { useAction } from "next-safe-action/hooks";
 
 export default function AcceptInvitationCard({
   invitation,
 }: {
   readonly invitation: InvitationWithOrganization | null;
 }) {
-  const router = useRouter();
-  const { execute: acceptInvitation, isLoading: isAcceptingInvitation } =
-    useServerAction({
-      action: onAcceptInvitation,
-      onSuccess: () => {
-        router.push(appConfig.authRoutes.default);
-      },
-    });
-
-  const { execute: declineInvitation, isLoading: isDecliningInvitation } =
-    useServerAction({
-      action: onDeclineInvitation,
-      onSuccess: () => {
-        router.push(appConfig.authRoutes.default);
-      },
-    });
+  const { execute: acceptInvitation, isExecuting: isAcceptingInvitation } =
+    useAction(acceptInvitationAction);
+  const { execute: declineInvitation, isExecuting: isDecliningInvitation } =
+    useAction(declineInvitationAction);
 
   return (
     <div className="flex h-screen w-screen items-center justify-center">
@@ -69,7 +56,7 @@ export default function AcceptInvitationCard({
               onClick={() =>
                 declineInvitation({
                   invitationId: invitation?.id ?? "",
-                  revalidatePath: appConfig.appRoutes.acceptInvitation,
+                  revalidatePath: appConfig.authRoutes.default,
                 })
               }
               loading={isDecliningInvitation}
@@ -80,7 +67,7 @@ export default function AcceptInvitationCard({
               onClick={() =>
                 acceptInvitation({
                   invitationId: invitation?.id ?? "",
-                  revalidatePath: appConfig.appRoutes.acceptInvitation,
+                  revalidatePath: appConfig.authRoutes.default,
                 })
               }
               loading={isAcceptingInvitation}

@@ -1,6 +1,6 @@
 "use client";
 
-import { onUpdateUserName } from "@/actions/users";
+import { updateUserNameAction } from "@/actions/users";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,57 +19,45 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useServerAction } from "@/hooks/use-server-action";
 import { authClient } from "@/lib/auth-client";
-import { UpdateUserName, updateUserNameSchema } from "@/types/user.schema";
+import { updateUserNameSchema } from "@/types/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { Label } from "recharts";
 import { toast } from "sonner";
 
 export default function ProfileDetails() {
   const { data } = authClient.useSession();
 
-  const { execute, isLoading } = useServerAction({
-    action: onUpdateUserName,
-    onSuccess: async () => {
-      toast.success("Profile details updated successfully");
-      await authClient.updateUser({ name: nameForm.getValues("name") });
-    },
-    onError: () => {
-      toast.error("Failed to update profile details");
-    },
-  });
-
-  const nameForm = useForm<UpdateUserName>({
-    resolver: zodResolver(updateUserNameSchema),
-    defaultValues: { name: data?.user.name },
-    mode: "onChange",
-  });
-
-  useEffect(() => {
-    nameForm.reset({ name: data?.user.name });
-  }, [data, nameForm]);
-
-  const onSubmitNameForm = async (data: UpdateUserName) => {
-    await execute(data);
-  };
+  const { form, action, handleSubmitWithAction, resetFormAndAction } =
+    useHookFormAction(updateUserNameAction, zodResolver(updateUserNameSchema), {
+      formProps: {
+        mode: "onChange",
+        defaultValues: { name: data?.user.name },
+      },
+      actionProps: {
+        onSuccess: async () => {
+          resetFormAndAction();
+          toast.success("Profile details updated successfully");
+          await authClient.updateUser({ name: form.getValues("name") });
+        },
+        onError: (error) => {
+          toast.error(error.error.serverError);
+        },
+      },
+    });
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      <Form {...nameForm}>
-        <form
-          onSubmit={nameForm.handleSubmit(onSubmitNameForm)}
-          className="space-y-4"
-        >
+      <Form {...form}>
+        <form onSubmit={handleSubmitWithAction} className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Name</CardTitle>
             </CardHeader>
             <CardContent>
               <FormField
-                control={nameForm.control}
+                control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
@@ -90,8 +78,8 @@ export default function ProfileDetails() {
               <Button
                 type="submit"
                 size="sm"
-                loading={isLoading}
-                disabled={isLoading}
+                loading={action.isExecuting}
+                disabled={action.isExecuting}
               >
                 Save
               </Button>

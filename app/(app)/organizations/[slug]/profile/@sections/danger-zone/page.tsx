@@ -1,5 +1,6 @@
 "use client";
 
+import { deleteUserAction } from "@/actions/users";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,46 +21,36 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { appConfig } from "@/constants/config";
-import { authClient } from "@/lib/auth-client";
-import { DeleteUserForm, deleteUserSchema } from "@/types/user.schema";
+import { deleteUserSchema } from "@/types/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { error } from "console";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { useRouter } from "nextjs-toploader/app";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function DangerZone() {
   const router = useRouter();
-  const [isDeleting, setIsDeleting] = useState(false);
-  const form = useForm<DeleteUserForm>({
-    resolver: zodResolver(deleteUserSchema),
-    defaultValues: { password: "" },
-    mode: "onChange",
-  });
 
-  const onSubmit = async (value: DeleteUserForm) => {
-    try {
-      setIsDeleting(true);
-      const { error } = await authClient.deleteUser({
-        password: value.password,
-      });
-      if (error) throw new Error(error.message);
-      else {
-        toast.success("Account deleted successfully");
-        router.push(appConfig.authRoutes.default);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to delete account");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
+  const { form, action, handleSubmitWithAction, resetFormAndAction } =
+    useHookFormAction(deleteUserAction, zodResolver(deleteUserSchema), {
+      formProps: {
+        mode: "onChange",
+        defaultValues: { password: "" },
+      },
+      actionProps: {
+        onSuccess: () => {
+          resetFormAndAction();
+          toast.success("Account deleted successfully");
+          router.push(appConfig.authRoutes.default);
+        },
+        onError: (error) => {
+          toast.error(error.error.serverError);
+        },
+      },
+    });
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmitWithAction}>
         <Card>
           <CardHeader>
             <CardTitle className="text-destructive">Danger Zone</CardTitle>
@@ -92,7 +83,7 @@ export default function DangerZone() {
               type="submit"
               size="sm"
               variant="destructive"
-              loading={isDeleting}
+              loading={action.isExecuting}
             >
               Delete Account
             </Button>

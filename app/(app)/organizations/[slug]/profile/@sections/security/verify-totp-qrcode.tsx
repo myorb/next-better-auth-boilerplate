@@ -1,5 +1,6 @@
 "use client";
 
+import { verifyTwoFactorTOTPAction } from "@/actions/two-factor";
 import { Button } from "@/components/ui/button";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -13,14 +14,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { authClient } from "@/lib/auth-client";
-import {
-  VerifyTwoFactorSchema,
-  verifyTwoFactorSchema,
-} from "@/types/account.schema";
+import { verifyTwoFactorTOTPSchema } from "@/types/account.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import QrCode from "react-qr-code";
 import { toast } from "sonner";
 
@@ -29,28 +25,26 @@ type VerifyTOTPQRCodeProps = {
 };
 
 export default function VerifyTOTPQRCode({ secret }: VerifyTOTPQRCodeProps) {
-  const [isEnabling2FA, setIsEnabling2FA] = useState(false);
-  const form = useForm<VerifyTwoFactorSchema>({
-    resolver: zodResolver(verifyTwoFactorSchema),
-    defaultValues: { code: "" },
-    mode: "onChange",
-  });
-
-  const onSubmit = async (value: VerifyTwoFactorSchema) => {
-    try {
-      setIsEnabling2FA(true);
-      const { data, error } = await authClient.twoFactor.verifyTotp({
-        code: value.code,
-      });
-      if (error) toast.error(error.message);
-      console.log(data);
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to enable 2FA");
-    } finally {
-      setIsEnabling2FA(false);
-    }
-  };
+  const { form, action, handleSubmitWithAction, resetFormAndAction } =
+    useHookFormAction(
+      verifyTwoFactorTOTPAction,
+      zodResolver(verifyTwoFactorTOTPSchema),
+      {
+        formProps: {
+          mode: "onChange",
+          defaultValues: { code: "" },
+        },
+        actionProps: {
+          onSuccess: () => {
+            resetFormAndAction();
+            toast.success("2FA verified successfully");
+          },
+          onError: (error) => {
+            toast.error(error.error.serverError);
+          },
+        },
+      }
+    );
 
   return (
     <>
@@ -66,7 +60,7 @@ export default function VerifyTOTPQRCode({ secret }: VerifyTOTPQRCodeProps) {
         <QrCode value={secret} />
         <Separator />
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmitWithAction} className="space-y-4">
             <FormField
               control={form.control}
               name="code"
@@ -83,7 +77,11 @@ export default function VerifyTOTPQRCode({ secret }: VerifyTOTPQRCodeProps) {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" loading={isEnabling2FA}>
+            <Button
+              type="submit"
+              className="w-full"
+              loading={action.isExecuting}
+            >
               Submit
             </Button>
           </form>

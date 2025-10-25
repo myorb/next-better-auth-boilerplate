@@ -1,9 +1,7 @@
-import { Organization } from "better-auth/plugins";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { auth } from "./auth";
-import { authClient } from "./auth-client";
 import * as UAParser from "ua-parser-js";
+import { authClient } from "./auth-client";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

@@ -1,6 +1,6 @@
 "use client";
 
-import { onUnlinkAccount } from "@/actions/accounts";
+import { unlinkAccountAction } from "@/actions/accounts";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,21 +10,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { appConfig } from "@/constants/config";
-import { useServerAction } from "@/hooks/use-server-action";
 import { authClient } from "@/lib/auth-client";
-import { ProviderType } from "@/types/organizations";
 import {
   IconBrandApple,
   IconBrandFacebook,
   IconBrandGithub,
   IconBrandGoogle,
 } from "@tabler/icons-react";
+import { useAction } from "next-safe-action/hooks";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
 const providers: {
-  key: ProviderType;
+  key: string;
   label: string;
   icon: React.ReactNode;
 }[] = [
@@ -53,7 +52,7 @@ const providers: {
 interface ListProvidersProps {
   accounts: {
     id: string;
-    provider: string;
+    providerId: string;
     createdAt: Date;
     updatedAt: Date;
     accountId: string;
@@ -63,32 +62,28 @@ interface ListProvidersProps {
 
 export default function ListProviders({ accounts }: ListProvidersProps) {
   const { slug } = useParams<{ slug: string }>();
-
-  const [isAccountLinking, setIsAccountLinking] = useState<boolean>(false);
   const [selectedAccountKey, setSelectedAccountKey] = useState<string | null>(
     null
   );
+  const [isLinkingAccount, setIsLinkingAccount] = useState(false);
 
-  const handleLinkProvider = async (provider: ProviderType) => {
+  const handleLinkAccount = async (providerId: string) => {
     try {
-      setIsAccountLinking(true);
-      const { error } = await authClient.linkSocial({
-        provider,
+      setIsLinkingAccount(true);
+      const { error } = await authClient.signIn.social({
+        provider: providerId,
         callbackURL: `${appConfig.authRoutes.default}/${slug}/profile/providers`,
       });
-      if (error) throw new Error(error.message);
-      toast.success("Provider linked successfully");
+      if (error) toast.error(error.message);
+      else toast.success("Account linked successfully");
     } catch (error) {
-      if (error instanceof Error) toast.error(error.message);
-      else toast.error("Failed to link provider");
+      console.error(error);
+      toast.error("Something went wrong");
     } finally {
-      setIsAccountLinking(false);
+      setIsLinkingAccount(false);
     }
   };
-
-  const { execute: executeUnlink, isLoading: isUnlinking } = useServerAction({
-    action: onUnlinkAccount,
-  });
+  const unlinkAccount = useAction(unlinkAccountAction);
 
   return (
     <Card className="bg-card text-card-foreground rounded-2xl border shadow-sm">
@@ -101,7 +96,7 @@ export default function ListProviders({ accounts }: ListProvidersProps) {
       <CardContent className="flex flex-col gap-4">
         {providers.map((provider) => {
           const linkedAccount = accounts.find(
-            (account) => account.provider === provider.key
+            (account) => account.providerId === provider.key
           );
 
           return (
@@ -117,18 +112,19 @@ export default function ListProviders({ accounts }: ListProvidersProps) {
                 variant={linkedAccount ? "outline" : "default"}
                 size="sm"
                 loading={
-                  (isUnlinking && selectedAccountKey === provider.key) ||
-                  (isAccountLinking && selectedAccountKey === provider.key)
+                  (unlinkAccount.isExecuting &&
+                    selectedAccountKey === provider.key) ||
+                  (isLinkingAccount && selectedAccountKey === provider.key)
                 }
                 onClick={() => {
                   setSelectedAccountKey(provider.key);
                   if (linkedAccount) {
-                    executeUnlink({
-                      providerId: linkedAccount.provider,
+                    unlinkAccount.execute({
+                      providerId: linkedAccount.providerId,
                       accountId: linkedAccount.accountId,
                     });
                   } else {
-                    handleLinkProvider(provider.key);
+                    handleLinkAccount(provider.key);
                   }
                 }}
               >

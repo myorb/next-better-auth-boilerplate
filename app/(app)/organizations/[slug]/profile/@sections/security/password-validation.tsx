@@ -1,7 +1,12 @@
 "use client";
 
+import { enableTwoFactorAction } from "@/actions/two-factor";
 import { Button } from "@/components/ui/button";
-import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -11,52 +16,61 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
-import {
-  EnableTwoFactorSchema,
-  enableTwoFactorSchema,
-} from "@/types/account.schema";
+import { enableTwoFactorSchema } from "@/types/account.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { toast } from "sonner";
 
 type PasswordValidationProps = {
-  onSuccess: (
-    data: {
-      totpURI: string;
-      backupCodes: string[];
-    } | null
-  ) => void;
+  onEnable2FA: (data: { totpURI: string; backupCodes: string[] }) => void;
 };
 
-export default function PasswordValidation({
-  onSuccess,
-}: PasswordValidationProps) {
-  const [isEnabling2FA, setIsEnabling2FA] = useState(false);
-  const form = useForm<EnableTwoFactorSchema>({
-    resolver: zodResolver(enableTwoFactorSchema),
-    defaultValues: { password: "" },
-    mode: "onChange",
-  });
+export default function PasswordValidation({ onEnable2FA }: PasswordValidationProps) {
+  // const [isEnabling2FA, setIsEnabling2FA] = useState(false);
+  // const form = useForm<EnableTwoFactorSchema>({
+  //   resolver: zodResolver(enableTwoFactorSchema),
+  //   defaultValues: { password: "" },
+  //   mode: "onChange",
+  // });
 
-  const onSubmit = async (value: EnableTwoFactorSchema) => {
-    try {
-      setIsEnabling2FA(true);
-      const { data, error } = await authClient.twoFactor.enable({
-        password: value.password,
-      });
-      console.log(data, error);
-      if (error) toast.error(error.message);
-      if (data) onSuccess(data);
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to enable 2FA");
-    } finally {
-      setIsEnabling2FA(false);
-    }
-  };
+  // const onSubmit = async (value: EnableTwoFactorSchema) => {
+  //   try {
+  //     setIsEnabling2FA(true);
+  //     const { data, error } = await authClient.twoFactor.enable({
+  //       password: value.password,
+  //     });
+  //     console.log(data, error);
+  //     if (error) toast.error(error.message);
+  //     if (data) onSuccess(data);
+  //   } catch (error) {
+  //     console.error(error);
+  //     toast.error("Failed to enable 2FA");
+  //   } finally {
+  //     setIsEnabling2FA(false);
+  //   }
+  // };
 
+  const { form, action, handleSubmitWithAction, resetFormAndAction } =
+    useHookFormAction(
+      enableTwoFactorAction,
+      zodResolver(enableTwoFactorSchema),
+      {
+        formProps: {
+          mode: "onChange",
+          defaultValues: { password: "" },
+        },
+        actionProps: {
+          onSuccess: (args) => {
+            resetFormAndAction();
+            toast.success("2FA enabled successfully");
+            onEnable2FA(args.data?.data);
+          },
+          onError: (error) => {
+            toast.error(error.error.serverError);
+          },
+        },
+      }
+    );
   return (
     <>
       <DialogHeader>
@@ -68,7 +82,7 @@ export default function PasswordValidation({
         your password.
       </DialogDescription>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmitWithAction} className="space-y-4">
           <FormField
             control={form.control}
             name="password"
@@ -82,7 +96,7 @@ export default function PasswordValidation({
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full" loading={isEnabling2FA}>
+          <Button type="submit" className="w-full" loading={action.isExecuting}>
             Submit
           </Button>
         </form>

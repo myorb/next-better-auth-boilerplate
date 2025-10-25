@@ -1,5 +1,6 @@
 "use client";
 
+import { disableTwoFactorAction } from "@/actions/two-factor";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,45 +19,34 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
 import {
-  DisableTwoFactorSchema,
   disableTwoFactorSchema
 } from "@/types/account.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "nextjs-toploader/app";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { toast } from "sonner";
 
 export default function DisableTwoFactorDialog() {
-  const router = useRouter();
-  const [isDisabling2FA, setIsDisabling2FA] = useState(false);
-  const form = useForm<DisableTwoFactorSchema>({
-    resolver: zodResolver(disableTwoFactorSchema),
-    defaultValues: { password: "" },
-    mode: "onChange",
-  });
-
-  const onSubmit = async (value: DisableTwoFactorSchema) => {
-    try {
-      setIsDisabling2FA(true);
-      const { data, error } = await authClient.twoFactor.disable({
-        password: value.password,
-      });
-      console.log(data, error);
-      if (error) toast.error(error.message);
-      if (data) {
-        toast.success("2FA disabled successfully");
-        router.refresh();
+  const { form, action, handleSubmitWithAction, resetFormAndAction } =
+    useHookFormAction(
+      disableTwoFactorAction,
+      zodResolver(disableTwoFactorSchema),
+      {
+        formProps: {
+          mode: "onChange",
+          defaultValues: { password: "" },
+        },
+        actionProps: {
+          onSuccess: () => {
+            resetFormAndAction();
+            toast.success("2FA disabled successfully");
+          },
+          onError: (error) => {
+            toast.error(error.error.serverError);
+          },
+        },
       }
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to disable 2FA");
-    } finally {
-      setIsDisabling2FA(false);
-    }
-  };
+    );
 
   return (
     <Dialog>
@@ -73,7 +63,7 @@ export default function DisableTwoFactorDialog() {
           your password.
         </DialogDescription>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmitWithAction} className="space-y-4">
             <FormField
               control={form.control}
               name="password"
@@ -87,7 +77,11 @@ export default function DisableTwoFactorDialog() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" loading={isDisabling2FA}>
+            <Button
+              type="submit"
+              className="w-full"
+              loading={action.isExecuting}
+            >
               Submit
             </Button>
           </form>

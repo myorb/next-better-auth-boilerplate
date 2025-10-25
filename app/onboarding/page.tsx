@@ -3,7 +3,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from "@/components/ui/card";
 import { appConfig } from "@/constants/config";
 import { auth } from "@/lib/auth";
@@ -21,6 +21,14 @@ export default async function OnboardingPage() {
   const organizations = await auth.api.listOrganizations({
     headers: await headers(),
     query: { userId: data.session.userId },
+  });
+
+  await auth.api.setActiveOrganization({
+    body: {
+      organizationId: organizations[0].id,
+      organizationSlug: organizations[0].slug,
+    },
+    headers: await headers(),
   });
 
   if (organizations.length > 0)

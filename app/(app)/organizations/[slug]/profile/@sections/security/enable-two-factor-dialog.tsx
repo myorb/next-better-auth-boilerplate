@@ -32,8 +32,7 @@ export default function EnableTwoFactorDialog() {
       <DialogContent>
         {state.step === "password" && (
           <PasswordValidation
-            onSuccess={(data) => {
-              console.log(data);
+            onEnable2FA={(data) => {
               setState({
                 step: "qr-code",
                 totpURI: data?.totpURI,

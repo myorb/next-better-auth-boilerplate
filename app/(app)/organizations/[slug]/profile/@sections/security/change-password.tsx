@@ -1,5 +1,6 @@
 "use client";
 
+import { changePasswordAction } from "@/actions/users";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,46 +19,32 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { authClient } from "@/lib/auth-client";
-import { ChangePasswordForm, changePasswordSchema } from "@/types/user.schema";
+import { changePasswordSchema } from "@/types/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "nextjs-toploader/app";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { toast } from "sonner";
 
 export default function ChangePassword() {
-  const router = useRouter();
-
-  const [isLoading, setIsLoading] = useState(false);
-  const form = useForm<ChangePasswordForm>({
-    resolver: zodResolver(changePasswordSchema),
-    defaultValues: { currentPassword: "", newPassword: "" },
-    mode: "onChange",
-  });
-
-  const onSubmit = async (data: ChangePasswordForm) => {
-    try {
-      console.log(data);
-      setIsLoading(true);
-      await authClient.changePassword({
-        newPassword: data.newPassword,
-        currentPassword: data.currentPassword,
-        revokeOtherSessions: true,
-      });
-      toast.success("Password changed successfully");
-      form.reset();
-      router.refresh();
-    } catch (error) {
-      toast.error("Failed to change password");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { form, action, handleSubmitWithAction, resetFormAndAction } =
+    useHookFormAction(changePasswordAction, zodResolver(changePasswordSchema), {
+      formProps: {
+        mode: "onChange",
+        defaultValues: { currentPassword: "", newPassword: "" },
+      },
+      actionProps: {
+        onSuccess: () => {
+          resetFormAndAction();
+          toast.success("Password changed successfully");
+        },
+        onError: (error) => {
+          toast.error(error.error.serverError);
+        },
+      },
+    });
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmitWithAction} className="space-y-4">
         <Card>
           <CardHeader>
             <CardTitle>Change password</CardTitle>
@@ -99,8 +86,8 @@ export default function ChangePassword() {
             <Button
               type="submit"
               size="sm"
-              loading={isLoading}
-              disabled={isLoading}
+              loading={action.isExecuting}
+              disabled={action.isExecuting}
             >
               Save
             </Button>

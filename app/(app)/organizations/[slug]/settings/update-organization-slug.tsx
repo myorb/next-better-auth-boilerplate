@@ -1,4 +1,4 @@
-import { updateOrganization } from "@/actions/organizations";
+import { updateOrganizationSlugAction } from "@/actions/organizations";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,47 +15,54 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { InputWithAdornment } from "@/components/ui/input-with-adornment";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group";
 import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
+import { updateOrganizationSlugSchema } from "@/types/organization.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
+import { IconCheck, IconX } from "@tabler/icons-react";
 import { Organization } from "better-auth/plugins";
-import { error } from "console";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "nextjs-toploader/app";
 import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
-
-const updateOrganizationSlugSchema = z.object({
-  slug: z
-    .string()
-    .min(1, { message: "Slug is required" })
-    .regex(/^[a-z0-9-]+$/, {
-      message: "Slug must contain only lowercase letters, numbers, and hyphens",
-    }),
-});
-
-type UpdateOrganizationSlug = z.infer<typeof updateOrganizationSlugSchema>;
 
 export function UpdateOrganizationSlug({
   organization,
 }: {
   organization: Organization;
 }) {
-  const router = useRouter();
-  const [isUpdating, setIsUpdating] = useState(false);
   const [slug, setSlug] = useState({
     initialValue: organization.slug,
     value: "",
     isValidating: false,
+    isError: false,
   });
-  const form = useForm<UpdateOrganizationSlug>({
-    resolver: zodResolver(updateOrganizationSlugSchema),
-    defaultValues: { slug: organization.slug },
-    mode: "onChange",
-  });
+  const { form, action, handleSubmitWithAction, resetFormAndAction } =
+    useHookFormAction(
+      updateOrganizationSlugAction,
+      zodResolver(updateOrganizationSlugSchema),
+      {
+        formProps: {
+          mode: "onChange",
+          defaultValues: { slug: organization.slug },
+        },
+        actionProps: {
+          onSuccess: () => {
+            resetFormAndAction();
+            toast.success("Organization slug updated successfully");
+          },
+          onError: (error) => {
+            toast.error(error.error.serverError);
+          },
+        },
+      }
+    );
 
   const handleSlugCheck = useCallback(
     async (value: string) => {
@@ -65,8 +72,14 @@ export function UpdateOrganizationSlug({
         const { error } = await authClient.organization.checkSlug({
           slug: value,
         });
-        if (error) form.setError("slug", { message: "Slug is already taken" });
+        if (error) {
+          setSlug((prev) => ({ ...prev, isError: true }));
+          form.setError("slug", { message: "Slug is already taken" });
+        } else {
+          setSlug((prev) => ({ ...prev, isError: false }));
+        }
       } catch (error) {
+        setSlug((prev) => ({ ...prev, isError: true }));
         form.setError("slug", { message: "Error checking slug" });
       } finally {
         setSlug((prev) => ({ ...prev, isValidating: false }));
@@ -85,34 +98,15 @@ export function UpdateOrganizationSlug({
     return () => clearTimeout(timer);
   }, [slug.value, handleSlugCheck]);
 
-  const onSubmit = async (data: UpdateOrganizationSlug) => {
-    setIsUpdating(true);
-    try {
-      const { success } = await updateOrganization({
-        name: organization.name,
-        slug: data.slug,
-      });
-      if (success) {
-        router.push(`/organizations/${data.slug}`);
-        toast.success("Organization slug updated successfully");
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to update organization slug");
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
   const disabledForm =
-    isUpdating ||
+    action.isExecuting ||
     !form.formState.isValid ||
     slug.isValidating ||
     slug.value === slug.initialValue;
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmitWithAction} className="space-y-4">
         <Card>
           <CardHeader>
             <CardTitle>Organization Slug</CardTitle>
@@ -125,20 +119,36 @@ export function UpdateOrganizationSlug({
                 <FormItem>
                   <FormLabel>Please enter a unique slug</FormLabel>
                   <FormControl>
-                    <InputWithAdornment
-                      {...field}
-                      startAdornment="/organizations/"
-                      endAdornment={
-                        slug.isValidating && (
-                          <Loader2 className="size-4 animate-spin" />
-                        )
-                      }
-                      placeholder="acme-inc"
-                      onChange={(e) => {
-                        field.onChange(e);
-                        setSlug((prev) => ({ ...prev, value: e.target.value }));
-                      }}
-                    />
+                    <InputGroup>
+                      <InputGroupInput
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setSlug((prev) => ({
+                            ...prev,
+                            value: e.target.value,
+                          }));
+                        }}
+                        placeholder="acme-inc"
+                        className="pl-1!"
+                      />
+                      <InputGroupAddon>
+                        <InputGroupText>/organizations/</InputGroupText>
+                      </InputGroupAddon>
+                      <InputGroupAddon align="inline-end">
+                        {slug.isValidating ? (
+                          <Spinner />
+                        ) : slug.isError ? (
+                          <div className="bg-destructive text-white flex size-4 items-center justify-center rounded-full">
+                            <IconX className="size-3" />
+                          </div>
+                        ) : (
+                          <div className="bg-primary text-primary-foreground flex size-4 items-center justify-center rounded-full">
+                            <IconCheck className="size-3" />
+                          </div>
+                        )}
+                      </InputGroupAddon>
+                    </InputGroup>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -154,7 +164,7 @@ export function UpdateOrganizationSlug({
               type="submit"
               size="sm"
               disabled={disabledForm}
-              loading={isUpdating}
+              loading={action.isExecuting}
             >
               Save
             </Button>

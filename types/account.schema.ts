@@ -1,20 +1,18 @@
 import { z } from "zod";
-import { ProviderType } from "@/types/organizations";
 
 export const linkAccountSchema = z.object({
-  provider: z.string().transform((val) => val as ProviderType),
+  providerId: z.string(),
   callbackURL: z.string().url(),
 });
 
 export type LinkAccountSchema = z.infer<typeof linkAccountSchema>;
 
 export const unlinkAccountSchema = z.object({
-  providerId: z.string().transform((val) => val as ProviderType),
+  providerId: z.string(),
   accountId: z.string(),
 });
 
 export type UnlinkAccountSchema = z.infer<typeof unlinkAccountSchema>;
-
 
 export const enableTwoFactorSchema = z.object({
   password: z.string().min(8),
@@ -33,3 +31,11 @@ export const verifyTwoFactorSchema = z.object({
 });
 
 export type VerifyTwoFactorSchema = z.infer<typeof verifyTwoFactorSchema>;
+
+export const verifyTwoFactorTOTPSchema = z.object({
+  code: z.string().min(6),
+});
+
+export type VerifyTwoFactorTOTPSchema = z.infer<
+  typeof verifyTwoFactorTOTPSchema
+>;
