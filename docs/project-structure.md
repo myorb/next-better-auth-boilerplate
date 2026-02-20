@@ -17,8 +17,8 @@ nextjs-better-auth-neon-boilerplate/
 ├── tailwind.config.ts           # Tailwind CSS configuration
 ├── postcss.config.mjs           # PostCSS configuration
 ├── eslint.config.mjs            # ESLint configuration
-├── drizzle.config.ts            # Database configuration
-├── drizzle-prod.config.ts       # Production database config
+├── prisma.config.ts             # Prisma configuration
+├── prisma/                      # Prisma schema and migrations
 ├── components.json              # shadcn/ui configuration
 ├── middleware.ts                # Route protection middleware
 └── docs/                        # Documentation files
@@ -155,11 +155,10 @@ Database schema and connection configuration.
 
 ```
 server/
-├── index.ts     # Database connection
-└── schema.ts    # Drizzle ORM schema definitions
+└── index.ts     # Prisma Client connection
 ```
 
-**Purpose**: Database layer with Drizzle ORM setup, schema definitions, and connection management.
+**Purpose**: Database layer with Prisma Client setup and connection management.
 
 ### Authentication (`lib/`)
 
@@ -226,20 +225,20 @@ types/
 
 ### Database Configuration
 
-#### `drizzle.config.ts`
+#### `prisma.config.ts`
 ```typescript
+import { defineConfig } from "prisma/config";
+
 export default defineConfig({
-  schema: "./server/schema.ts",
-  out: "./server/drizzle",
-  dialect: "postgresql",
-  dbCredentials: {
-    url: process.env.DATABASE_URL!,
+  schema: "prisma/schema.prisma",
+  datasource: {
+    url: process.env.DATABASE_URL,
   },
 });
 ```
 
-#### `drizzle-prod.config.ts`
-Production database configuration with separate credentials.
+#### `prisma/schema.prisma`
+Prisma models, mappings, and datasource provider configuration.
 
 ### Build Configuration
 
@@ -287,7 +286,7 @@ TypeScript configuration with path mapping and strict settings.
 
 ### Adding New Features
 
-1. **Database Schema** → Update `server/schema.ts`
+1. **Database Schema** → Update `prisma/schema.prisma`
 2. **Types** → Add types in `types/`
 3. **Actions** → Create server actions in `actions/`
 4. **Components** → Build UI in `components/`
@@ -314,7 +313,7 @@ import { UserProfile } from "./user-profile";
 
 // Absolute imports for shared utilities
 import { auth } from "@/lib/auth";
-import { db } from "@/server";
+import { db } from "@/lib/prisma";
 ```
 
 ## Performance Considerations

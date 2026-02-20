@@ -1,6 +1,7 @@
 "use client";
 
 import { CreateOrganizationForm } from "@/components/create-organization-form";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,28 +10,26 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { appConfig } from "@/constants/config";
 import { Plus } from "lucide-react";
 import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
 
-export function CreateOrganizationModal() {
+export function CreateOrgModal() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <DropdownMenuItem
-          className="gap-2 p-2 cursor-pointer"
-          onSelect={(e) => e.preventDefault()}
+        <Button
+          variant="ghost"
+          className="p-1 w-full justify-start cursor-pointer"
+          onClick={() => setOpen(!open)}
         >
-          <div className="flex size-6 items-center justify-center rounded-md border">
-            <Plus className="size-4" />
-          </div>
+          <Plus className="size-4" />
           <span className="font-medium">Create Organization</span>
-        </DropdownMenuItem>
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

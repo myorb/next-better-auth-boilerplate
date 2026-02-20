@@ -50,9 +50,8 @@ export function ForgotPasswordForm() {
           );
         }
       } else {
-        const { error } = await authClient.forgetPassword({
+        const { error } = await authClient.forgetPassword.emailOtp({
           email: formData.email,
-          redirectTo: appConfig.authRoutes.resetPassword,
         });
         if (error) toast.error(error.message);
         else toast.success("Password reset link sent to email");

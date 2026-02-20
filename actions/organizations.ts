@@ -3,8 +3,7 @@
 import { appConfig } from "@/constants/config";
 import { auth } from "@/lib/auth";
 import { authActionClient } from "@/lib/safe-action";
-import { db } from "@/server";
-import { members, sessions } from "@/server/schema";
+import { db } from "@/lib/prisma";
 import {
   acceptInvitationSchema,
   cancelInvitationSchema,
@@ -17,7 +16,6 @@ import {
   updateOrganizationNameSchema,
   updateOrganizationSlugSchema,
 } from "@/types/organization.schema";
-import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
@@ -95,10 +93,10 @@ export const setActiveOrganizationAction = authActionClient
       });
 
       // update session table with active organization id
-      await db
-        .update(sessions)
-        .set({ activeOrganizationId: id })
-        .where(eq(sessions.id, ctx.sessionId));
+      await db.session.update({
+        where: { id: ctx.sessionId },
+        data: { activeOrganizationId: id },
+      });
 
       revalidatePath(appConfig.authRoutes.default, "page");
       return {
@@ -218,11 +216,10 @@ export const declineInvitationAction = authActionClient
 export async function getUserDefaultOrganizationId(
   userId: string
 ): Promise<string | null> {
-  const organizationsData = await db
-    .select()
-    .from(members)
-    .where(eq(members.userId, userId))
-    .limit(1);
+  const organizationsData = await db.member.findFirst({
+    where: { userId },
+    select: { organizationId: true },
+  });
   console.log(organizationsData);
-  return organizationsData?.[0]?.organizationId ?? null;
+  return organizationsData?.organizationId ?? null;
 }

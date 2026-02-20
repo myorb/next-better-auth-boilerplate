@@ -2,7 +2,7 @@ import { appConfig } from "@/constants/config";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { OrganizationDropdown } from "./organization-dropdown";
+import { OrgSwitcher } from "./org-switcher";
 
 export async function OrganizationSwitcher() {
   const session = await auth.api.getSession({
@@ -14,5 +14,5 @@ export async function OrganizationSwitcher() {
     headers: await headers(),
   });
 
-  return <OrganizationDropdown organizations={organizations} />;
+  return <OrgSwitcher organizations={organizations} />;
 }

@@ -44,9 +44,9 @@ A production-ready Next.js boilerplate with comprehensive authentication, multi-
 
 ### 🛠 Developer Experience
 - **TypeScript** for type safety
-- **Drizzle ORM** with PostgreSQL
+- **Prisma ORM** with PostgreSQL
 - **Next-safe-action** for type-safe server actions
-- **Database Migrations** with Drizzle Kit
+- **Database Migrations** with Prisma Migrate
 - **ESLint** configuration
 - **Environment-based Config** for different stages
 
@@ -157,9 +157,10 @@ npm run build        # Build for production
 npm run start        # Start production server
 
 # Database
-npm run db:generate  # Generate database migrations
+npm run db:generate  # Generate Prisma Client
+npm run db:migrate   # Create/apply migrations
 npm run db:push      # Push schema to database
-npm run db:studio    # Open Drizzle Studio
+npm run db:studio    # Open Prisma Studio
 
 # Code Quality
 npm run lint         # Run ESLint
@@ -235,7 +236,7 @@ The boilerplate includes email templates for:
 ## 🔒 Security Features
 
 - **CSRF Protection** via Better Auth
-- **SQL Injection Prevention** via Drizzle ORM
+- **SQL Injection Prevention** via Prisma ORM
 - **XSS Protection** via React's built-in sanitization
 - **Secure Cookies** with HttpOnly and SameSite
 - **Rate Limiting** for API endpoints

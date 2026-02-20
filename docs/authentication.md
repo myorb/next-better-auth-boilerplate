@@ -4,7 +4,7 @@ This document describes the comprehensive authentication system built with Bette
 
 ## Overview
 
-The authentication system provides multiple sign-in methods, advanced security features, and seamless user management. Built on Better Auth with PostgreSQL and Drizzle ORM.
+The authentication system provides multiple sign-in methods, advanced security features, and seamless user management. Built on Better Auth with PostgreSQL and Prisma ORM.
 
 ## Authentication Methods
 

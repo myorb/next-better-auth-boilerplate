@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
-import { Passkey } from "better-auth/plugins/passkey";
+import { Passkey } from "@better-auth/passkey";
 import { useState } from "react";
 
 export default function PasskeyList({ passkeys }: { passkeys: Passkey[] }) {

@@ -7,10 +7,10 @@ import OrganizationInviteEmail from "@/emails/organization-invitation";
 import { ResetPasswordEmail } from "@/emails/reset-password";
 import { ResetPasswordOtpEmail } from "@/emails/reset-password-otp";
 import { SigninOtpVerificationEmail } from "@/emails/signin-otp-verification";
-import { db } from "@/server"; // your drizzle instance
+import { db } from "@/lib/prisma";
 import { render } from "@react-email/components";
 import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import {
   apiKey,
@@ -20,13 +20,13 @@ import {
   organization,
   twoFactor,
 } from "better-auth/plugins";
-import { passkey } from "better-auth/plugins/passkey";
 import { resend } from "./resend";
+import { passkey } from "@better-auth/passkey"
 
 export const auth = betterAuth({
   appName: "Next Better Auth Neon Boilerplate",
   baseURL: process.env.BETTER_AUTH_URL!,
-  database: drizzleAdapter(db, { provider: "pg", usePlural: true }),
+  database: prismaAdapter(db, { provider: "mysql"}),
   trustedOrigins: [process.env.BETTER_AUTH_URL!],
   session: {
     cookieCache: {
@@ -233,12 +233,8 @@ export const auth = betterAuth({
       },
     }),
     apiKey(),
-    passkey({
-      rpID: "localhost",
-      rpName: "Next Better Auth Neon Boilerplate",
-      origin: process.env.BETTER_AUTH_URL!,
-    }),
     nextCookies(),
+    passkey(), 
     customSession(async ({ user, session }) => {
       // You can return a custom object, but just returning user and session is fine.
       return { user, session };

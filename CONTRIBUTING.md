@@ -85,7 +85,7 @@ npm run db:generate
 # Push schema to database
 npm run db:push
 
-# (Optional) Open Drizzle Studio
+# (Optional) Open Prisma Studio
 npm run db:studio
 ```
 

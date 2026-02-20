@@ -23,6 +23,31 @@ export default async function OnboardingPage() {
     query: { userId: data.session.userId },
   });
 
+  if (organizations.length === 0) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center">
+        <Card className="w-full max-w-xs sm:max-w-sm relative">
+          <CardHeader className="shadow-xs border-none bg-transparent">
+            <div className="flex flex-col items-center text-center">
+              <IconFlowerFilled className="size-10" />
+              <div className="flex flex-col">
+                <CardTitle className="text-xl font-semibold">
+                  Create your organization
+                </CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">
+                  Create your organization to get started
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <OnboardingForm />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   await auth.api.setActiveOrganization({
     body: {
       organizationId: organizations[0].id,
@@ -33,27 +58,4 @@ export default async function OnboardingPage() {
 
   if (organizations.length > 0)
     redirect(`${appConfig.authRoutes.default}/${organizations[0].slug}`);
-
-  return (
-    <div className="flex h-screen w-screen items-center justify-center">
-      <Card className="w-full max-w-xs sm:max-w-sm relative">
-        <CardHeader className="shadow-xs border-none bg-transparent">
-          <div className="flex flex-col items-center text-center">
-            <IconFlowerFilled className="size-10" />
-            <div className="flex flex-col">
-              <CardTitle className="text-xl font-semibold">
-                Create your organization
-              </CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
-                Create your organization to get started
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <OnboardingForm />
-        </CardContent>
-      </Card>
-    </div>
-  );
 }
